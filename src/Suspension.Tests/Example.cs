@@ -1,21 +1,17 @@
 ﻿using System;
+using static Suspension.Flow;
 
 namespace Suspension.Tests
 {
     public sealed class Example
     {
-        [Suspend]
-        private static void Suspend()
-        {
-        }
-
         public void Run(Action<int> action) // start
         {
             action(1);
-            Suspend(); // 1
+            Suspend("One"); // 1
             action(2);
             action(3);
-            Suspend(); // 2
+            Suspend("Two");
             action(4);
         } // finish
 

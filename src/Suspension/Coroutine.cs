@@ -1,4 +1,4 @@
-﻿namespace Suspension.Tests
+﻿namespace Suspension
 {
     public abstract class Coroutine<T>
     {

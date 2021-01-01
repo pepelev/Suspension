@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace Suspension.Tests
+namespace Suspension
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class SuspendAttribute : Attribute
+    public sealed class SuspendableAttribute : Attribute
     {
     }
 }

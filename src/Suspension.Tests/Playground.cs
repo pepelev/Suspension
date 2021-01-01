@@ -21,16 +21,8 @@ namespace Suspension.Tests
 
 namespace Playground.Test
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public sealed class SuspendAttribute : Attribute {}
-
     public sealed class Example
     {
-        [Suspend]
-        private static void Suspend()
-        {
-        }
-
         public void Run(Action<int> action) // start
         {
             action(15);
