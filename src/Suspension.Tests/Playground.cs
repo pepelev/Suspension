@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,93 +17,29 @@ namespace Suspension.Tests
         [Test]
         public void Test()
         {
-            var tree = CSharpSyntaxTree.ParseText(
-                @"using System;
-
-namespace Playground.Test
-{
-    public sealed class Example
-    {
-        public void Run(Action<int> action) // start
-        {
-            action(15);
-        } // finish
-    }
-}"
-            );
-
+            var code = File.ReadAllText("Samples/JustSingleLineOfCode/Class.cs", Encoding.UTF8);
+            var tree = CSharpSyntaxTree.ParseText(code);
+            var assembly = typeof(Attribute).Assembly;
             var compilation = CSharpCompilation.Create(
-                "Playground.Test",
+                "Suspension.Tests.Samples",
                 new[] {tree},
-                new[] {MetadataReference.CreateFromFile(typeof(object).Assembly.Location)},
+                new[]
+                {
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.9\\System.Runtime.dll"),
+                    MetadataReference.CreateFromFile(typeof(Coroutine<>).Assembly.Location)
+                },
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
-
-            var emitResult = compilation.Emit(Stream.Null);
-            var semantic = compilation.GetSemanticModel(tree);
-            var syntaxNodes = tree.GetRoot().DescendantNodes().ToList();
-            var syntax = syntaxNodes
-                .OfType<MethodDeclarationSyntax>()
-                .Single(method => semantic.GetDeclaredSymbol(method)?.Name == "Run");
-
-            var symbol = semantic.GetDeclaredSymbol(syntax) ?? throw new Exception("GetDeclaredSymbol failed");
-
-            var graph = ControlFlowGraph.Create(syntax, semantic);
-
-            var entry = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Entry);
-            var exit = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Exit);
-
-            var parameters = new MethodParameters();
-            var d = (
-                from block in graph.Blocks.Except(new[] {entry, exit})
-                from operation in block.Operations
-                from parameter in operation.Accept(parameters, new None())
-                select parameter
-            ).ToList();
-            var fields = string.Join(
-                "\n",
-                d.Select(pair => $"private readonly {pair.Type} {pair.Name};")
-            );
-            var arguments = string.Join(
-                ", ",
-                d.Select(pair => $"{pair.Type} {pair.Name}")
-            );
-            var assignments = string.Join(
-                "\n",
-                d.Select(pair => $"this.{pair.Name} = {pair.Name};")
-            );
-
-            Console.WriteLine(
-                $@"namespace {symbol.ContainingNamespace}
-{{
-    public sealed class Start : Suspension.Coroutine<None>
-    {{
-{fields}
-        public Start({arguments})
-        {{
-{assignments}
-        }}
-        public override bool Completed => false;
-        public override None Result => throw new InvalidOperationException();
-
-        public override Coroutine<None> Run()
-        {{
-            action(15);
-            return new Finish();
-        }}
-    }}
-
-    public sealed class Finish : Coroutine<None>
-    {{
-        public override bool Completed => true;
-        public override None Result => new None();
-        public override Coroutine<None> Run() => throw new InvalidOperationException();
-    }}
-}}"
-            );
+            foreach (var syntaxTree in new Coroutines(compilation))
+            {
+                var path = Path.Combine("Samples/JustSingleLineOfCode", syntaxTree.FilePath);
+                var expectedCode = File.ReadAllText(path, Encoding.UTF8);
+                Assert.AreEqual(expectedCode, syntaxTree.ToString());
+            }
         }
 
-        private sealed class MethodParameters : OperationVisitor<None, IEnumerable<(string Type, string Name)>>
+        public sealed class MethodParameters : OperationVisitor<None, IEnumerable<(string Type, string Name)>>
         {
             public override IEnumerable<(string Type, string Name)> DefaultVisit(IOperation operation, None argument)
             {
@@ -149,7 +86,7 @@ namespace Playground.Test
             }
         }
 
-        private sealed class V : OperationVisitor<None, IEnumerable<string>>
+        public sealed class V : OperationVisitor<None, IEnumerable<string>>
         {
             public override IEnumerable<string> DefaultVisit(IOperation operation, None argument)
             {
