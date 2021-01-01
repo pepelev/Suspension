@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace Suspension.Tests
 {
@@ -69,6 +70,12 @@ namespace Suspension.Tests
                     from parameter in operation.Accept(parameters, new None())
                     select parameter
                 ).ToList();
+                var instructions = new V2();
+                var operations = (
+                    from block in graph.Blocks.Except(new[] {entry, exit})
+                    from operation in block.Operations
+                    select operation.Accept(instructions, new None())
+                ).ToList();
                 var fields = string.Join(
                     "\n",
                     d.Select(pair => $"private readonly {pair.Type} {pair.Name};")
@@ -102,7 +109,7 @@ namespace Suspension.Tests
 
                     public override Coroutine<None> Run()
                     {{
-                        action();
+{string.Join("\n", operations)}
                         return new Finish();
                     }}
                 }}
@@ -145,5 +152,32 @@ namespace Suspension.Tests
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    internal class V2 : OperationVisitor<None, string>
+    {
+        public override string DefaultVisit(IOperation operation, None argument)
+        {
+            throw new Exception($"V2 Visit failed {operation}"); ;
+        }
+
+        public override string VisitExpressionStatement(IExpressionStatementOperation operation, None argument)
+        {
+            return operation.Operation.Accept(this, argument);
+        }
+
+        public override string VisitInvocation(IInvocationOperation operation, None none)
+        {
+            var instance = operation.Instance.Accept(this, none);
+            var arguments = string.Join(
+                ", ",
+                operation.Arguments.Select(argument => argument.Accept(this, none))
+            );
+
+            return $"{instance}({arguments});";
+        }
+
+        public override string VisitParameterReference(IParameterReferenceOperation operation, None argument)
+            => $"this.{operation.Parameter.Name}";
     }
 }

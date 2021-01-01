@@ -19,7 +19,7 @@ this.action = action;
 
                     public override Coroutine<None> Run()
                     {
-                        action();
+this.action();
                         return new Finish();
                     }
                 }
