@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\bin\tests</OutputPath>
+    <OutputPath>..\..\bin\suspension.tests</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
