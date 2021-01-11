@@ -47,7 +47,7 @@ namespace Suspension.Tests
                 new[]
                 {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                    MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.10\\System.Runtime.dll"),
+                    MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.9\\System.Runtime.dll"),
                     MetadataReference.CreateFromFile(typeof(Coroutine<>).Assembly.Location)
                 },
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
@@ -57,6 +57,27 @@ namespace Suspension.Tests
                 var path = Path.Combine("Samples/Conditions", syntaxTree.FilePath);
                 var expectedCode = File.ReadAllText(path, Encoding.UTF8);
                 Assert.AreEqual(expectedCode, syntaxTree.ToString());
+            }
+        }
+
+        [Test]
+        public void TestExceptions()
+        {
+            var code = File.ReadAllText("Samples/Exceptions/TryFinally.cs", Encoding.UTF8);
+            var tree = CSharpSyntaxTree.ParseText(code);
+            var compilation = CSharpCompilation.Create(
+                "Suspension.Tests.Samples",
+                new[] {tree},
+                new[]
+                {
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.9\\System.Runtime.dll"),
+                    MetadataReference.CreateFromFile(typeof(Coroutine<>).Assembly.Location)
+                },
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            );
+            foreach (var syntaxTree in new Coroutines(compilation))
+            {
             }
         }
 
