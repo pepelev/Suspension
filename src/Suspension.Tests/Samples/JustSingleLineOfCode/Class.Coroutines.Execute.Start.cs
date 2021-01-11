@@ -1,4 +1,4 @@
-﻿namespace Suspension.Tests.Samples.JustSingleLineOfCode
+﻿namespace Suspension.Tests.Samples.Conditions
 {
     public static partial class Class
     {

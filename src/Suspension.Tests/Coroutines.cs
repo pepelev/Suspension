@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.CodeAnalysis.Operations;
+using Suspension.Tests.Predicates;
 
 namespace Suspension.Tests
 {
@@ -42,16 +43,7 @@ namespace Suspension.Tests
             var methodDeclaration = syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .Where(
-                    method => semantic
-                        .GetDeclaredSymbol(method)
-                        .GetAttributes()
-                        .Any(attribute =>
-                            {
-                                var @class = attribute.AttributeClass;
-                                return @class.Name == "SuspendableAttribute" &&
-                                       @class.ContainingNamespace.ToString() == "Suspension";
-                            }
-                        )
+                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute")).Match
                 );
 
             foreach (var syntax in methodDeclaration)
@@ -62,6 +54,75 @@ namespace Suspension.Tests
 
                 var entry = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Entry);
                 var exit = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Exit);
+
+
+                var next = graph.Blocks
+                    .SelectMany(block => block.Predecessors)
+                    .ToLookup(branch => branch.Source.Ordinal);
+
+
+                var ppp = Do(entry, 0).ToList();
+
+                IEnumerable<(IReadOnlyList<Instruction> Instructions, BasicBlock Block, int OperationIndex)> Do(BasicBlock block, int operationIndex)
+                {
+                    if (block.Kind == BasicBlockKind.Entry)
+                    {
+                        var branches = next[block.Ordinal].ToList();
+
+                        if (branches.Count == 1)
+                            return Do(branches[0].Destination, 0);
+
+                        throw new Exception("Single branch supported");
+                    }
+                    else if (block.Kind == BasicBlockKind.Exit)
+                    {
+                        return new[] { (Array.Empty<Instruction>() as IReadOnlyList<Instruction>, block, 0) };
+                    }
+                    else
+                    {
+                        var branches = next[block.Ordinal].ToList();
+                        if (branches.Count == 1)
+                        {
+                            return Do(branches[0].Destination, 0)
+                                .Select(
+                                    triple =>
+                                    {
+                                        var instructions = block.Operations
+                                            .Select(operation => new OperationInstruction(operation))
+                                            .Concat(triple.Instructions)
+                                            .ToList() as IReadOnlyList<Instruction>;
+                                        return (instructions, triple.Block, triple.OperationIndex);
+                                    }
+                                )
+                                .ToList();
+                        }
+
+                        if (branches.Count == 2)
+                        {
+                            var (conditional, unconditional) = (branches[0], branches[1]) switch
+                            {
+                                ({ IsConditionalSuccessor: false }, { IsConditionalSuccessor: false }) => throw new Exception("both branches unconditional"),
+                                ({ IsConditionalSuccessor: false } a, { IsConditionalSuccessor: true } b) => (b, a),
+                                ({ IsConditionalSuccessor: true } a, { IsConditionalSuccessor: false } b) => (a, b),
+                                ({ IsConditionalSuccessor: true }, { IsConditionalSuccessor: true }) => throw new Exception("both branches conditional")
+                            };
+                            var (@true, @false) = branches[0].Source.ConditionKind == ControlFlowConditionKind.WhenTrue
+                                ? (conditional, unconditional)
+                                : (unconditional, conditional);
+
+                            //from istina in Do(@true.Destination, 0)
+                            //from lozh in Do(@false.Destination, 0)
+                            //select (
+                            //    new[] {},
+                            //    ,
+
+                            //)
+                        }
+                    }
+
+                    throw new Exception("at most two branches supported");
+                }
+
 
                 var parameters = new Playground.MethodParameters();
                 var d = (
