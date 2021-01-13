@@ -8,9 +8,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.CodeAnalysis.Operations;
-using Suspension.Tests.Predicates;
+using Suspension.SourceGenerator.Predicates;
 
-namespace Suspension.Tests
+namespace Suspension.SourceGenerator
 {
     public sealed class Coroutines : IEnumerable<SyntaxTree>
     {
@@ -35,6 +35,8 @@ namespace Suspension.Tests
                 select csharpSyntaxTree
             ).GetEnumerator();
         }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private IEnumerable<SyntaxTree> Trees(SyntaxTree tree)
         {
@@ -74,11 +76,12 @@ namespace Suspension.Tests
 
                         throw new Exception("Single branch supported");
                     }
-                    else if (block.Kind == BasicBlockKind.Exit)
+
+                    if (block.Kind == BasicBlockKind.Exit)
                     {
-                        return new[] { (Array.Empty<Instruction>() as IReadOnlyList<Instruction>, block, 0) };
+                        return new[] {(Array.Empty<Instruction>() as IReadOnlyList<Instruction>, block, 0)};
                     }
-                    else
+
                     {
                         var branches = next[block.Ordinal].ToList();
                         if (branches.Count == 1)
@@ -124,7 +127,7 @@ namespace Suspension.Tests
                 }
 
 
-                var parameters = new Playground.MethodParameters();
+                var parameters = new MethodParameters();
                 var d = (
                     from block in graph.Blocks.Except(new[] {entry, exit})
                     from operation in block.Operations
@@ -211,15 +214,14 @@ namespace Suspension.Tests
                 );
             }
         }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     internal class V2 : OperationVisitor<None, string>
     {
         public override string DefaultVisit(IOperation operation, None argument)
         {
-            throw new Exception($"V2 Visit failed {operation}"); ;
+            throw new Exception($"V2 Visit failed {operation}");
+            ;
         }
 
         public override string VisitExpressionStatement(IExpressionStatementOperation operation, None argument)

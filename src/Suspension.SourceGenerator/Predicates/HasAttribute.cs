@@ -1,8 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
-namespace Suspension.Tests.Predicates
+namespace Suspension.SourceGenerator.Predicates
 {
     internal sealed class HasAttribute : Predicate<MethodDeclarationSyntax>
     {

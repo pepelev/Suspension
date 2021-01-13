@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Suspension.SourceGenerator\Suspension.SourceGenerator.csproj" />
     <ProjectReference Include="..\Suspension\Suspension.csproj" />
   </ItemGroup>
 
