@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Suspension", "Suspension\Suspension.csproj", "{325D559E-0FF4-4B90-B625-8D9915D5BA39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Suspension", "Suspension\Suspension.csproj", "{325D559E-0FF4-4B90-B625-8D9915D5BA39}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Suspension.SourceGenerator", "Suspension.SourceGenerator\Suspension.SourceGenerator.csproj", "{9306B5EE-EBB7-4001-802E-F5EABBA77B96}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Suspension.Tests", "Suspension.Tests\Suspension.Tests.csproj", "{C262D5E7-3577-4D18-B473-FEAF9D979474}"
 EndProject
@@ -17,6 +19,10 @@ Global
 		{325D559E-0FF4-4B90-B625-8D9915D5BA39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{325D559E-0FF4-4B90-B625-8D9915D5BA39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{325D559E-0FF4-4B90-B625-8D9915D5BA39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9306B5EE-EBB7-4001-802E-F5EABBA77B96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9306B5EE-EBB7-4001-802E-F5EABBA77B96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9306B5EE-EBB7-4001-802E-F5EABBA77B96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9306B5EE-EBB7-4001-802E-F5EABBA77B96}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C262D5E7-3577-4D18-B473-FEAF9D979474}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C262D5E7-3577-4D18-B473-FEAF9D979474}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C262D5E7-3577-4D18-B473-FEAF9D979474}.Release|Any CPU.ActiveCfg = Release|Any CPU
