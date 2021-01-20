@@ -1,17 +1,13 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Suspension.SourceGenerator.Predicates
 {
-    internal sealed class FullSymbolName : SymbolVisitor<ImmutableQueue<string>>
+    internal sealed class FullSymbolName : SymbolVisitor<string>
     {
-        public override ImmutableQueue<string> DefaultVisit(ISymbol symbol) => Name(symbol);
-
-        public override ImmutableQueue<string> VisitNamespace(INamespaceSymbol symbol) => symbol.IsGlobalNamespace
-            ? ImmutableQueue<string>.Empty
-            : Name(symbol);
-
-        private ImmutableQueue<string> Name(ISymbol symbol) =>
-            symbol.ContainingSymbol.Accept(this).Enqueue(symbol.Name);
+        public override string DefaultVisit(ISymbol symbol)
+        {
+            var segments = symbol.Accept(new SymbolNameSegments());
+            return string.Join(".", segments);
+        }
     }
 }

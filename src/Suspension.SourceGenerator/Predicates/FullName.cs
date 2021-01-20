@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace Suspension.SourceGenerator.Predicates
@@ -15,13 +14,8 @@ namespace Suspension.SourceGenerator.Predicates
 
         public override bool Match(ISymbol argument)
         {
-            var actualName = Name(argument);
+            var actualName = argument.Accept(new FullSymbolName());
             return StringComparer.Ordinal.Equals(actualName, expectedName);
         }
-
-        private string Name(ISymbol symbol) => string.Join(
-            (string?) ".",
-            (IEnumerable<string?>) symbol.Accept(new FullSymbolName())
-        );
     }
 }
