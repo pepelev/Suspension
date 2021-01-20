@@ -18,6 +18,7 @@ namespace Suspension.SourceGenerator.Predicates
         public override bool Match(MethodDeclarationSyntax method) => semantic
                 .GetDeclaredSymbol(method)
                 .GetAttributes()
-                .Any(attribute => predicate.Match(attribute.AttributeClass));
+                .Select(attribute => attribute.AttributeClass)
+                .Contains(predicate);
     }
 }

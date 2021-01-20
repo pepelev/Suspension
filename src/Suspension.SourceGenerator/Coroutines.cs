@@ -44,8 +44,8 @@ namespace Suspension.SourceGenerator
             var syntaxNodes = tree.GetRoot().DescendantNodes().ToList();
             var methodDeclaration = syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
-                .Where(
-                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute")).Match
+                .That(
+                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
                 );
 
             foreach (var syntax in methodDeclaration)
