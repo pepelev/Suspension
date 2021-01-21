@@ -11,6 +11,10 @@ namespace Suspension.Tests.Samples.Cycles
             {
                 Flow.Suspend("InsideWhile");
                 action("Hello");
+                while (argument())
+                {
+                    action("visited check");
+                }
             }
 
             Flow.Suspend("OutsideWhile");

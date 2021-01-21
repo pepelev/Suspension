@@ -9,7 +9,7 @@ namespace Suspension.SourceGenerator
 {
     public sealed class Graph : IEnumerable<(string From, string To)>
     {
-        private Lazy<Dictionary<BasicBlock, List<string>>> suspensionPoints;
+        private readonly Lazy<Dictionary<BasicBlock, List<string>>> suspensionPoints;
 
         public Graph(ControlFlowGraph graph)
         {
@@ -43,33 +43,25 @@ namespace Suspension.SourceGenerator
             var startBlock = pair.Key;
             var points = pair.Value;
 
-            var visited = new HashSet<BasicBlock> {startBlock};
+            var visited = new HashSet<BasicBlock>();
             var queue = new Queue<BasicBlock>();
-            {
-                if (startBlock.ConditionalSuccessor is { } conditional)
-                {
-                    queue.Enqueue(conditional.Destination);
-                }
-
-                if (startBlock.FallThroughSuccessor is { } fallThrough)
-                {
-                    queue.Enqueue(fallThrough.Destination);
-                }
-            }
+            queue.Enqueue(startBlock);
 
             while (queue.Count > 0)
             {
                 var block = queue.Dequeue();
 
-                if (suspensionPoints.Value.TryGetValue(block, out var list))
+                var nonTrivialWayExists = startBlock != block || visited.Contains(startBlock);
+                if (nonTrivialWayExists && suspensionPoints.Value.TryGetValue(block, out var list))
                 {
                     yield return (points.Last(), list[0]);
                 }
+                else if (visited.Contains(block))
+                {
+                    continue;
+                }
                 else
                 {
-                    if (visited.Contains(block))
-                        continue;
-
                     if (block.ConditionalSuccessor is { } conditional)
                     {
                         queue.Enqueue(conditional.Destination);
