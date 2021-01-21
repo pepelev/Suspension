@@ -75,12 +75,28 @@ namespace Suspension.SourceGenerator.Domain
             List<AttributeListSyntax>(),
             TokenList(
                 Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.StaticKeyword),
+                Token(SyntaxKind.AbstractKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
             Identifier(method.Name),
             typeParameterList: null,
-            baseList: null,
+            BaseList(
+                SeparatedList<BaseTypeSyntax>(
+                    new[]
+                    {
+                        SimpleBaseType(
+                            GenericName(
+                                Identifier("Suspension.Coroutine"),
+                                TypeArgumentList(
+                                    SeparatedList(
+                                        new[] { ParseTypeName("Suspension.None") }
+                                    )
+                                )
+                            )
+                        )
+                    }
+                )
+            ),
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[] {CoroutineClass}
@@ -91,16 +107,25 @@ namespace Suspension.SourceGenerator.Domain
             List<AttributeListSyntax>(),
             TokenList(
                 Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.StaticKeyword),
-                Token(SyntaxKind.PartialKeyword)
+                Token(SyntaxKind.SealedKeyword)
             ),
             Identifier(name),
             typeParameterList: null,
-            baseList: null,
+            BaseList(
+                SeparatedList<BaseTypeSyntax>(
+                    new[]
+                    {
+                        SimpleBaseType(
+                            ParseTypeName(method.ContainingType.Accept(new FullSymbolName()) + ".Coroutines." + method.Name)
+                        )
+                    }
+                )
+            ),
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[]
                 {
+                    // ctor and Run()
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         TokenList(
