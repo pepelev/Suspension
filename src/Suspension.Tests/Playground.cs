@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -27,6 +28,13 @@ namespace Suspension.Tests
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
             var syntaxTrees = new Coroutines2(tree, compilation).ToList();
+
+            Console.WriteLine(
+                string.Join(
+                    Environment.NewLine,
+                    syntaxTrees
+                )
+            );
         }
 
         [Test]

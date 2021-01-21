@@ -22,14 +22,14 @@ namespace Suspension.SourceGenerator.Domain
             this.method = method;
         }
 
-        public override SyntaxTree Document => CSharpSyntaxTree.Create(Namespace);
+        public override SyntaxTree Document => CSharpSyntaxTree.Create(Namespace.NormalizeWhitespace());
 
         private NamespaceDeclarationSyntax Namespace
         {
             get
             {
                 return NamespaceDeclaration(
-                    ParseName(method.Accept(new FullSymbolName())),
+                    ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
                     List<ExternAliasDirectiveSyntax>(),
                     List<UsingDirectiveSyntax>(),
                     List<MemberDeclarationSyntax>(
@@ -46,9 +46,9 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
-            Token(SyntaxTriviaList.Empty, SyntaxKind.IdentifierName, method.ContainingType.Name, method.ContainingType.Name, SyntaxTriviaList.Empty),
-            TypeParameterList(),
-            BaseList(),
+            Identifier(method.ContainingType.Name),
+            typeParameterList: null,
+            baseList: null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[] {CoroutinesClass}
@@ -62,9 +62,9 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
-            Token(SyntaxTriviaList.Empty, SyntaxKind.IdentifierName, "Coroutines", "Coroutines", SyntaxTriviaList.Empty),
-            TypeParameterList(),
-            BaseList(),
+            Identifier("Coroutines"),
+            typeParameterList: null,
+            baseList: null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[] {MethodClass}
@@ -78,9 +78,9 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
-            Token(SyntaxTriviaList.Empty, SyntaxKind.IdentifierName, method.Name, method.Name, SyntaxTriviaList.Empty),
-            TypeParameterList(),
-            BaseList(),
+            Identifier(method.Name),
+            typeParameterList: null,
+            baseList: null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[] {CoroutineClass}
@@ -94,9 +94,9 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
-            Token(SyntaxTriviaList.Empty, SyntaxKind.IdentifierName, name, name, SyntaxTriviaList.Empty),
-            TypeParameterList(),
-            BaseList(),
+            Identifier(name),
+            typeParameterList: null,
+            baseList: null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[]
@@ -109,12 +109,13 @@ namespace Suspension.SourceGenerator.Domain
                         ),
                         ParseTypeName("System.Boolean"),
                         null,
-                        Token(SyntaxTriviaList.Empty, SyntaxKind.IdentifierName, "Completed", "Completed", SyntaxTriviaList.Empty),
+                        Identifier(nameof(Coroutine<None>.Completed)),
                         null,
                         ArrowExpressionClause(
-                            LiteralExpression(SyntaxKind.FalseKeyword)
+                            LiteralExpression(SyntaxKind.FalseLiteralExpression)
                         ),
-                        null
+                        null,
+                        Token(SyntaxKind.SemicolonToken)
                     ),
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
@@ -124,16 +125,19 @@ namespace Suspension.SourceGenerator.Domain
                         ),
                         ParseTypeName("Suspension.None"),
                         null,
-                        Token(SyntaxTriviaList.Empty, SyntaxKind.IdentifierName, "Result", "Result", SyntaxTriviaList.Empty),
+                        Identifier(nameof(Coroutine<None>.Result)),
                         null,
                         ArrowExpressionClause(
                             ThrowExpression(
                                 ObjectCreationExpression(
-                                    ParseTypeName("System.InvalidOperationException")
+                                    ParseTypeName("System.InvalidOperationException"),
+                                    ArgumentList(),
+                                    null
                                 )
                             )
                         ),
-                        null
+                        null,
+                        Token(SyntaxKind.SemicolonToken)
                     )
                 }
             )

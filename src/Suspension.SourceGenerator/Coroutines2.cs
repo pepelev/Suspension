@@ -84,10 +84,8 @@ namespace Suspension.SourceGenerator
 
             foreach (var dumb in result)
             {
-                var d = dumb.Document;
+                yield return dumb.Document;
             }
-
-            yield break;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
