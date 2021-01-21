@@ -33,6 +33,16 @@ namespace Suspension.SourceGenerator
 
             var semantic = compilation.GetSemanticModel(document);
             var syntaxNodes = document.GetRoot().DescendantNodes().ToList();
+
+            var method = syntaxNodes
+                .OfType<MethodDeclarationSyntax>()
+                .That(
+                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
+                )
+                .Single();
+            var graph = ControlFlowGraph.Create(method, semantic);
+            var valueTuples = new Graph(graph).ToList();
+
             return syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .That(
@@ -40,6 +50,83 @@ namespace Suspension.SourceGenerator
                 )
                 .SelectMany(method => MakeSuspendable(method, semantic))
                 .GetEnumerator();
+        }
+
+        private IEnumerable<(string From, string To)> Graph(MethodDeclarationSyntax method, SemanticModel semantic)
+        {
+            var graph = ControlFlowGraph.Create(method, semantic);
+            var entry = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Entry);
+            var exit = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Exit);
+
+            var suspensionPoints = graph.Blocks.Select(
+                    block => new
+                    {
+                        Block = block,
+                        SuspensionPoints = block.Operations
+                            .That(new SuspensionPoint.Is())
+                            .Select(new SuspensionPoint.Name())
+                            .ToList()
+                    }
+                )
+                .Prepend(new {Block = entry, SuspensionPoints = new List<string> {"Entry"}})
+                .Append(new {Block = exit, SuspensionPoints = new List<string> {"Exit"}})
+                .Where(pair => pair.SuspensionPoints.Any())
+                .ToDictionary(pair => pair.Block, pair => pair.SuspensionPoints);
+
+            foreach (var names in suspensionPoints.Values)
+            {
+                foreach (var pair in names.Pairwise())
+                {
+                    yield return pair;
+                }
+            }
+
+            foreach (var pair in suspensionPoints)
+            {
+                var startBlock = pair.Key;
+                var points = pair.Value;
+
+                var visited = new HashSet<BasicBlock> {startBlock};
+                var queue = new Queue<BasicBlock>();
+                {
+                    if (startBlock.ConditionalSuccessor is { } conditional)
+                    {
+                        queue.Enqueue(conditional.Destination);
+                    }
+
+                    if (startBlock.FallThroughSuccessor is { } fallThrough)
+                    {
+                        queue.Enqueue(fallThrough.Destination);
+                    }
+                }
+
+                while (queue.Count > 0)
+                {
+                    var block = queue.Dequeue();
+
+                    if (suspensionPoints.TryGetValue(block, out var list))
+                    {
+                        yield return (points.Last(), list[0]);
+                    }
+                    else
+                    {
+                        if (visited.Contains(block))
+                            continue;
+
+                        if (block.ConditionalSuccessor is { } conditional)
+                        {
+                            queue.Enqueue(conditional.Destination);
+                        }
+
+                        if (block.FallThroughSuccessor is { } fallThrough)
+                        {
+                            queue.Enqueue(fallThrough.Destination);
+                        }
+                    }
+
+                    visited.Add(block);
+                }
+            }
         }
 
         private IEnumerable<SyntaxTree> MakeSuspendable(MethodDeclarationSyntax method, SemanticModel semantic)

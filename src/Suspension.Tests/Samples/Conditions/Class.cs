@@ -9,9 +9,11 @@ namespace Suspension.Tests.Samples.Conditions
         { // 0
             if (argument())
             {
+                Flow.Suspend("InsideIf");
                 action("Hello"); // 2
             }
 
+            Flow.Suspend("OutsideIf");
             action("World"); // 3
         } // 4
     }
