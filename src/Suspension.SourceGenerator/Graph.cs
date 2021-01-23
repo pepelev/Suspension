@@ -7,7 +7,7 @@ using Suspension.SourceGenerator.Predicates;
 
 namespace Suspension.SourceGenerator
 {
-    public sealed class Graph : IEnumerable<(string From, string To)>
+    internal sealed class Graph : IEnumerable<(string From, string To)>
     {
         private readonly Lazy<Dictionary<BasicBlock, List<string>>> suspensionPoints;
 
