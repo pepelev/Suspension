@@ -24,19 +24,23 @@ namespace Suspension.SourceGenerator
                                 .ToList()
                         }
                     )
-                    .Prepend(new { Block = graph.Entry(), SuspensionPoints = new List<string> { "Entry" } })
-                    .Append(new { Block = graph.Exit(), SuspensionPoints = new List<string> { "Exit" } })
+                    .Prepend(new {Block = graph.Entry(), SuspensionPoints = new List<string> {"Entry"}})
+                    .Append(new {Block = graph.Exit(), SuspensionPoints = new List<string> {"Exit"}})
                     .Where(pair => pair.SuspensionPoints.Any())
                     .ToDictionary(pair => pair.Block, pair => pair.SuspensionPoints)
             );
         }
 
+        private Dictionary<BasicBlock, List<string>> SuspensionPoints => suspensionPoints.Value;
+
         public IEnumerator<(string From, string To)> GetEnumerator()
         {
-            var inner = suspensionPoints.Value.Values.SelectMany(names => names.Pairwise());
-            var outer = suspensionPoints.Value.SelectMany(Outer);
+            var inner = SuspensionPoints.Values.SelectMany(names => names.Pairwise());
+            var outer = SuspensionPoints.SelectMany(Outer);
             return inner.Concat(outer).GetEnumerator();
         }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private IEnumerable<(string From, string To)> Outer(KeyValuePair<BasicBlock, List<string>> pair)
         {
@@ -52,7 +56,7 @@ namespace Suspension.SourceGenerator
                 var block = queue.Dequeue();
 
                 var nonTrivialWayExists = startBlock != block || visited.Contains(startBlock);
-                if (nonTrivialWayExists && suspensionPoints.Value.TryGetValue(block, out var list))
+                if (nonTrivialWayExists && SuspensionPoints.TryGetValue(block, out var list))
                 {
                     yield return (points.Last(), list[0]);
                 }
@@ -76,7 +80,5 @@ namespace Suspension.SourceGenerator
                 visited.Add(block);
             }
         }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
