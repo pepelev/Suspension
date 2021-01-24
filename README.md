@@ -20,13 +20,13 @@ partial class HelloWorld
     [Suspendable]
     public string WriteToConsole()
     {
-        Console.WriteLine("Hello")
+        Console.WriteLine("Hello");
 
         // this is suspension point named "Middle"
         // the name of suspension point must be unique for this method
         Suspension.Flow.Suspend("Middle");
-        Console.WriteLine("World!")
-        return "We made it!"
+        Console.WriteLine("World!");
+        return "We made it!";
     }
 }
 ```
@@ -100,11 +100,11 @@ partial class PartialHelloWorld
     [Suspendable]
     public void WriteToConsole()
     {
-        Console.WriteLine("Hello")
+        Console.WriteLine("Hello");
         var needWorld = Suspension.Flow<bool>.Wait("NeedWorld");
         if (needWorld)
         {
-            Console.WriteLine("World!")
+            Console.WriteLine("World!");
         }
     }
 }
