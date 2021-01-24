@@ -8,20 +8,49 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using NUnit.Framework;
 using Suspension.SourceGenerator;
+using Suspension.SourceGenerator.Domain;
 using Suspension.SourceGenerator.Predicates;
 
 namespace Suspension.Tests
 {
-    public class GraphShould
+    public class GraphsShould
     {
         [Test]
         public void Test()
         {
-            var code = File.ReadAllText("Samples/Cycles/While.cs", Encoding.UTF8);
+            var graph = Graph("Samples/Conditions/Class.cs");
+            var valueTuples = new Graph(graph).ToList();
+            valueTuples.Should().BeEquivalentTo(
+                ("Entry", "InsideWhile"),
+                ("Entry", "OutsideWhile"),
+                ("InsideWhile", "InsideWhile"),
+                ("InsideWhile", "OutsideWhile"),
+                ("OutsideWhile", "Exit")
+            );
+        }
+
+        [Test]
+        [TestCase("Conditions/Class")]
+        [TestCase("Cycles/While")] // todo why Entry contains local: d?
+        public void Test2(string @class)
+        {
+            var graph = Graph($"Samples/{@class}.cs");
+            var valueTuples = new Graph3(graph).ToList();
+            valueTuples.Should().BeEquivalentTo(
+                ("Entry", null as Scope),
+                ("InsideIf", null as Scope),
+                ("OutsideIf", null as Scope),
+                ("Exit", null as Scope)
+            );
+        }
+
+        private static ControlFlowGraph Graph(string path)
+        {
+            var code = File.ReadAllText(path, Encoding.UTF8);
             var tree = CSharpSyntaxTree.ParseText(code);
             var compilation = CSharpCompilation.Create(
                 "Suspension.Tests.Samples",
-                new[] { tree },
+                new[] {tree},
                 new[]
                 {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -38,14 +67,7 @@ namespace Suspension.Tests
                     new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
                 )
                 .Single();
-            var graph = ControlFlowGraph.Create(method, semantic);
-            new Graph(graph).Should().BeEquivalentTo(
-                ("Entry", "InsideWhile"),
-                ("Entry", "OutsideWhile"),
-                ("InsideWhile", "InsideWhile"),
-                ("InsideWhile", "OutsideWhile"),
-                ("OutsideWhile", "Exit")
-            );
+            return ControlFlowGraph.Create(method, semantic);
         }
     }
 }

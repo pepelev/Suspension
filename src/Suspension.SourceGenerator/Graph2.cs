@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+using System.Linq;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Suspension.SourceGenerator.Domain;
 
 namespace Suspension.SourceGenerator
 {
-    internal sealed class Graph2 : IEnumerable<(string From, string To, Scope References)>
+    internal sealed class Graph2 : IEnumerable<(string Suspension, Scope ShallowReferences)>
     {
         private readonly ControlFlowGraph graph;
 
@@ -16,129 +16,77 @@ namespace Suspension.SourceGenerator
             this.graph = graph;
         }
 
-        public IEnumerator<(string From, string To, Scope References)> GetEnumerator()
+        public IEnumerator<(string Suspension, Scope ShallowReferences)> GetEnumerator()
         {
-            var visited = new HashSet<BasicBlock>();
-            var queue = new Queue<Flow>();
-            var entryFlow = EntryFlow;
-            queue.Enqueue(entryFlow);
-            var scopes = new Dictionary<FlowPoint, Scope>
+            var names = new Graph(graph).SelectMany(pair => new[] { pair.From, pair.To }).Distinct().ToList();
+            foreach (var name in names)
             {
-                { entryFlow.Reminder.Start, entryFlow.References }
-            };
+                var startPoint = Find(name);
+                var scope = ConstantScope.Empty;
+                var visitor = new ScopeUsage();
+                var visited = new HashSet<BasicBlock>();
+                var queue = new Queue<FlowPoint>();
+                queue.Enqueue(startPoint);
 
-            while (queue.Count > 0)
-            {
-                m1:
-                var flow = queue.Dequeue();
-                var references = flow.References;
-                var reminder = flow.Reminder;
-                while (!reminder.Empty)
+                while (queue.Count > 0)
                 {
-                    var operation = reminder.Current;
-                    if (operation.Accept(new SuspensionPoint.Is()))
-                    {
-                        var name = operation.Accept(new SuspensionPoint.Name());
-                        yield return (flow.Origin, name, references);
+                    var point = queue.Dequeue();
+                    var block = point.Block;
+                    if (visited.Contains(block))
+                        continue;
 
-                        queue.Enqueue(new Flow(name, reminder.Next(), ConstantScope.Empty));
-                        goto m1;
+                    for (var i = point.Index; i < block.Operations.Length; i++)
+                    {
+                        var operation = block.Operations[i];
+                        if (operation.Accept(new SuspensionPoint.Is()))
+                            goto m1;
+
+                        scope = operation.Accept(visitor, scope);
                     }
 
-                    var visitor = new ScopeVisitor();
-                    references = operation.Accept(visitor, references);
+                    if (block.ConditionalSuccessor is { } conditional)
+                    {
+                        scope = block.BranchValue.Accept(visitor, scope);
+                        queue.Enqueue(new FlowPoint(conditional.Destination, 0));
+                    }
 
-                    reminder = reminder.Next();
+                    if (block.FallThroughSuccessor is { } fallThrough)
+                    {
+                        queue.Enqueue(new FlowPoint(fallThrough.Destination, 0));
+                    }
+
+                    m1: visited.Add(block);
                 }
 
-                foreach (var range in reminder.Continuations())
-                {
-                    queue.Enqueue(new Flow(flow.Origin, range, references));
-                }
+                yield return (name, scope);
             }
         }
-
-        private Flow EntryFlow => new Flow(
-            "Entry",
-            new BasicBlockRange(graph.Entry()),
-            ConstantScope.Empty
-        );
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private readonly struct Flow
+        private FlowPoint Find(string suspensionPoint)
         {
-            public Flow(string origin, BasicBlockRange reminder, Scope references)
+            if (suspensionPoint == "Entry")
+                return new FlowPoint(graph.Entry(), 0);
+
+            if (suspensionPoint == "Exit")
+                return new FlowPoint(graph.Exit(), 0);
+
+            foreach (var block in graph.Blocks)
             {
-                Origin = origin;
-                Reminder = reminder;
-                References = references;
+                for (var i = 0; i < block.Operations.Length; i++)
+                {
+                    var operation = block.Operations[i];
+                    if (operation.Accept(new SuspensionPoint.Is()))
+                    {
+                        var name = operation.Accept(new SuspensionPoint.Name());
+                        if (name == suspensionPoint)
+                            return new FlowPoint(block, i + 1);
+                    }
+                }
             }
 
-            public string Origin { get; }
-            public BasicBlockRange Reminder { get; }
-            public Scope References { get; }
-        }
-    }
-
-
-    internal readonly struct FlowPoint
-    {
-        public FlowPoint(BasicBlock block, int index)
-        {
-            this.block = block;
-            this.index = index;
-        }
-
-        private readonly BasicBlock block;
-        private readonly int index;
-    }
-
-    internal readonly struct BasicBlockRange
-    {
-        private BasicBlockRange(BasicBlock block, int fromInclusive, int toExclusive)
-        {
-            this.Block = block;
-            this.fromInclusive = fromInclusive;
-            this.toExclusive = toExclusive;
-        }
-
-        public BasicBlockRange(BasicBlock block)
-            : this(block, 0, block.Operations.Length)
-        {
-        }
-
-        public BasicBlock Block { get; }
-        private readonly int fromInclusive;
-        private readonly int toExclusive;
-
-        public bool Empty => fromInclusive >= toExclusive;
-
-        public IOperation Current => Empty
-            ? throw new InvalidOperationException()
-            : Block.Operations[fromInclusive];
-
-        public FlowPoint Start => new FlowPoint(Block, fromInclusive);
-
-        public BasicBlockRange Next()
-        {
-            if (Empty)
-                throw new InvalidOperationException();
-
-            return new BasicBlockRange(Block, fromInclusive + 1, toExclusive);
-        }
-
-        public IEnumerable<BasicBlockRange> Continuations()
-        {
-            if (Block.FallThroughSuccessor is {} fallThrough)
-            {
-                yield return new BasicBlockRange(fallThrough.Destination);
-            }
-
-            if (Block.ConditionalSuccessor is {} conditional)
-            {
-                yield return new BasicBlockRange(conditional.Destination);
-            }
+            throw new InvalidOperationException();
         }
     }
 }

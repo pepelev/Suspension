@@ -6,15 +6,15 @@ namespace Suspension.Tests.Samples.Conditions
     {
         [Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)
-        { // 0
+        {
             if (argument())
             {
                 Flow.Suspend("InsideIf");
-                action("Hello"); // 2
+                action("Hello");
             }
 
             Flow.Suspend("OutsideIf");
-            action("World"); // 3
-        } // 4
+            action("World");
+        }
     }
 }

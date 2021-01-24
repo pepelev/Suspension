@@ -20,6 +20,21 @@ namespace Suspension.SourceGenerator
         public override Scope VisitExpressionStatement(IExpressionStatementOperation operation, Scope argument) =>
             operation.Operation.Accept(this, argument);
 
+        public override Scope VisitInvocation(IInvocationOperation operation, Scope argument)
+        {
+            var scope = operation.Instance.Accept(this, argument);
+
+            foreach (var operationArgument in operation.Arguments)
+            {
+                scope = operationArgument.Accept(this, scope);
+            }
+
+            return scope;
+        }
+
+        public override Scope VisitArgument(IArgumentOperation operation, Scope argument) =>
+            operation.Value.Accept(this, argument);
+
         public override Scope VisitCompoundAssignment(ICompoundAssignmentOperation operation, Scope argument)
         {
             var scope = operation.Value.Accept(this, argument);

@@ -9,10 +9,12 @@ namespace Suspension.Tests.Samples.Cycles
         {
             while (argument())
             {
+                var d = 10;
                 Flow.Suspend("InsideWhile");
                 action("Hello");
                 while (argument())
                 {
+                    d += 2;
                     action("visited check");
                 }
             }
