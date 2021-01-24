@@ -13,5 +13,15 @@ namespace Suspension.SourceGenerator.Domain
         public Scope Union(IEnumerable<Value> values) => new ConstantScope(
             this.Concat(values)
         );
+
+        public override string ToString()
+        {
+            if (!this.Any())
+            {
+                return ":Empty:";
+            }
+
+            return string.Join(", ", this);
+        }
     }
 }
