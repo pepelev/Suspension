@@ -11,6 +11,9 @@ namespace Suspension.SourceGenerator.Domain
             this.local = local;
         }
 
+        public override ITypeSymbol Type => local.Type;
+        public override string Name => local.Name;
+
         private bool Equals(LocalValue other) =>
             SymbolEqualityComparer.Default.Equals(local, other.local);
 

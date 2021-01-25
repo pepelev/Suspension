@@ -135,6 +135,8 @@ namespace Suspension.SourceGenerator
             var graph = ControlFlowGraph.Create(method, semantic);
             var entry = graph.Blocks.Single(block => block.Kind == BasicBlockKind.Entry);
 
+            var references = new Graph3(graph).ToDictionary(pair => pair.Suspension, pair => pair.References);
+
             // todo put this code into bfs class
             var visited = new HashSet<BasicBlock>();
             var queue = new Queue<BasicBlock>();
@@ -153,7 +155,7 @@ namespace Suspension.SourceGenerator
                     if (operation.Accept(new SuspensionPoint.Is()))
                     {
                         var name = operation.Accept(new SuspensionPoint.Name());
-                        result.Add(new Dumb(name, symbol, i + 1, block));
+                        result.Add(new Dumb(name, symbol, new FlowPoint(block, i + 1), references[name]));
                     }
                 }
 

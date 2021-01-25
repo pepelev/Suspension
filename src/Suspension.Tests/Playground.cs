@@ -31,7 +31,7 @@ namespace Suspension.Tests
 
             Console.WriteLine(
                 string.Join(
-                    Environment.NewLine,
+                    Environment.NewLine + Environment.NewLine,
                     syntaxTrees
                 )
             );

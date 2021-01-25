@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
@@ -11,15 +13,15 @@ namespace Suspension.SourceGenerator.Domain
     {
         private readonly string name;
         private readonly IMethodSymbol method;
-        private readonly int operationIndex;
-        private readonly BasicBlock block;
+        private readonly FlowPoint flowPoint;
+        private readonly Scope start;
 
-        public Dumb(string name, IMethodSymbol method, int operationIndex, BasicBlock block)
+        public Dumb(string name, IMethodSymbol method, FlowPoint flowPoint, Scope start)
         {
             this.name = name;
-            this.operationIndex = operationIndex;
-            this.block = block;
             this.method = method;
+            this.flowPoint = flowPoint;
+            this.start = start;
         }
 
         public override SyntaxTree Document => CSharpSyntaxTree.Create(Namespace.NormalizeWhitespace());
@@ -122,49 +124,69 @@ namespace Suspension.SourceGenerator.Domain
                 )
             ),
             List<TypeParameterConstraintClauseSyntax>(),
-            List<MemberDeclarationSyntax>(
-                new[]
-                {
-                    // ctor and Run()
-                    PropertyDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(
-                            Token(SyntaxKind.PublicKeyword),
-                            Token(SyntaxKind.OverrideKeyword)
+            List(
+                Payload.Concat(
+                    new[]
+                    {
+                        PropertyDeclaration(
+                            List<AttributeListSyntax>(),
+                            TokenList(
+                                Token(SyntaxKind.PublicKeyword),
+                                Token(SyntaxKind.OverrideKeyword)
+                            ),
+                            ParseTypeName("System.Boolean"),
+                            null,
+                            Identifier(nameof(Coroutine<None>.Completed)),
+                            null,
+                            ArrowExpressionClause(
+                                LiteralExpression(SyntaxKind.FalseLiteralExpression)
+                            ),
+                            null,
+                            Token(SyntaxKind.SemicolonToken)
                         ),
-                        ParseTypeName("System.Boolean"),
-                        null,
-                        Identifier(nameof(Coroutine<None>.Completed)),
-                        null,
-                        ArrowExpressionClause(
-                            LiteralExpression(SyntaxKind.FalseLiteralExpression)
-                        ),
-                        null,
-                        Token(SyntaxKind.SemicolonToken)
-                    ),
-                    PropertyDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(
-                            Token(SyntaxKind.PublicKeyword),
-                            Token(SyntaxKind.OverrideKeyword)
-                        ),
-                        ParseTypeName("Suspension.None"),
-                        null,
-                        Identifier(nameof(Coroutine<None>.Result)),
-                        null,
-                        ArrowExpressionClause(
-                            ThrowExpression(
-                                ObjectCreationExpression(
-                                    ParseTypeName("System.InvalidOperationException"),
-                                    ArgumentList(),
-                                    null
+                        PropertyDeclaration(
+                            List<AttributeListSyntax>(),
+                            TokenList(
+                                Token(SyntaxKind.PublicKeyword),
+                                Token(SyntaxKind.OverrideKeyword)
+                            ),
+                            ParseTypeName("Suspension.None"),
+                            null,
+                            Identifier(nameof(Coroutine<None>.Result)),
+                            null,
+                            ArrowExpressionClause(
+                                ThrowExpression(
+                                    ObjectCreationExpression(
+                                        ParseTypeName("System.InvalidOperationException"),
+                                        ArgumentList(),
+                                        null
+                                    )
                                 )
-                            )
-                        ),
-                        null,
-                        Token(SyntaxKind.SemicolonToken)
+                            ),
+                            null,
+                            Token(SyntaxKind.SemicolonToken)
+                        )
+                    }
+                )
+            )
+        );
+
+        public IEnumerable<MemberDeclarationSyntax> Payload => start.Select(
+            value => FieldDeclaration(
+                List<AttributeListSyntax>(),
+                TokenList(
+                    Token(SyntaxKind.PrivateKeyword),
+                    Token(SyntaxKind.ReadOnlyKeyword)
+                ),
+                VariableDeclaration(
+                    ParseTypeName(value.Type.Accept(new FullSymbolName())),
+                    SeparatedList(
+                        new[]
+                        {
+                            VariableDeclarator(value.Name)
+                        }
                     )
-                }
+                )
             )
         );
     }

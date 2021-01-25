@@ -11,6 +11,9 @@ namespace Suspension.SourceGenerator.Domain
             this.parameter = parameter;
         }
 
+        public override ITypeSymbol Type => parameter.Type;
+        public override string Name => parameter.Name;
+
         private bool Equals(ParameterValue other) =>
             SymbolEqualityComparer.Default.Equals(parameter, other.parameter);
 
