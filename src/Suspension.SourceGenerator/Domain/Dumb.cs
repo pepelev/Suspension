@@ -125,7 +125,7 @@ namespace Suspension.SourceGenerator.Domain
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                Payload.Concat(
+                Payload.Append(Constructor).Concat(
                     new[]
                     {
                         PropertyDeclaration(
@@ -171,7 +171,7 @@ namespace Suspension.SourceGenerator.Domain
             )
         );
 
-        public IEnumerable<MemberDeclarationSyntax> Payload => start.Select(
+        private IEnumerable<MemberDeclarationSyntax> Payload => start.Select(
             value => FieldDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList(
@@ -185,6 +185,45 @@ namespace Suspension.SourceGenerator.Domain
                         {
                             VariableDeclarator(value.Name)
                         }
+                    )
+                )
+            )
+        );
+
+        private ConstructorDeclarationSyntax Constructor => ConstructorDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword)
+            ),
+            Identifier(name),
+            ParameterList(
+                SeparatedList(
+                    start.Select(
+                        value => Parameter(
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            ParseTypeName(value.Type.Accept(new FullSymbolName())),
+                            Identifier(value.Name),
+                            null
+                        )
+                    )
+                )
+            ),
+            null,
+            Block(
+                List<StatementSyntax>(
+                    start.Select(
+                        value => ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName(value.Name)
+                                ),
+                                IdentifierName(value.Name)
+                            )
+                        )
                     )
                 )
             )

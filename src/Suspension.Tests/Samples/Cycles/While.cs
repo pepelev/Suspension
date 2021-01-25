@@ -2,7 +2,7 @@
 
 namespace Suspension.Tests.Samples.Cycles
 {
-    public class While
+    public partial class While
     {
         [Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)
