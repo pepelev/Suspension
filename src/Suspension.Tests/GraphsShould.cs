@@ -31,7 +31,7 @@ namespace Suspension.Tests
 
         [Test]
         [TestCase("Conditions/Class")]
-        [TestCase("Cycles/While")] // todo why Entry contains local: d?
+        [TestCase("Cycles/While")]
         public void Test2(string @class)
         {
             var graph = Graph($"Samples/{@class}.cs");

@@ -14,6 +14,10 @@ namespace Suspension.SourceGenerator.Domain
             this.Concat(values)
         );
 
+        public Scope Except(IEnumerable<Value> values) => new ConstantScope(
+            this.AsEnumerable().Except(values)
+        );
+
         public override string ToString()
         {
             if (!this.Any())

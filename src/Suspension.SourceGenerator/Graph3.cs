@@ -19,10 +19,13 @@ namespace Suspension.SourceGenerator
         public IEnumerator<(string Suspension, Scope References)> GetEnumerator()
         {
             var ways = new Graph(graph).ToLookup(pair => pair.From, pair => pair.To);
-            var shallowReferences = new Graph2(graph, new ScopeUsage())
+            var usages = new Graph2(graph, new ScopeUsage())
+                .ToDictionary(pair => pair.Suspension, pair => pair.Scope);
+
+            var declarations = new Graph2(graph, new ScopeDeclaration())
                 .ToDictionary(pair => pair.Suspension, pair => pair.Scope);
             var result = new Dictionary<string, Lazy<Scope>>();
-            foreach (var pair in shallowReferences)
+            foreach (var pair in usages)
             {
                 var reachable = ways[pair.Key].Except(new[] {pair.Key});
                 result.Add(
@@ -31,7 +34,7 @@ namespace Suspension.SourceGenerator
                         () => reachable.Aggregate(
                             pair.Value,
                             (scope, name) => scope.Union(result[name].Value)
-                        )
+                        ).Except(declarations[pair.Key])
                     )
                 );
             }
