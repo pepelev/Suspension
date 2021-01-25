@@ -3,27 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.FlowAnalysis;
+using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain;
 
 namespace Suspension.SourceGenerator
 {
-    internal sealed class Graph2 : IEnumerable<(string Suspension, Scope ShallowReferences)>
+    internal sealed class Graph2 : IEnumerable<(string Suspension, Scope Scope)>
     {
         private readonly ControlFlowGraph graph;
+        private readonly OperationVisitor<Scope, Scope> scopeVisitor;
 
-        public Graph2(ControlFlowGraph graph)
+        public Graph2(ControlFlowGraph graph, OperationVisitor<Scope, Scope> scopeVisitor)
         {
             this.graph = graph;
+            this.scopeVisitor = scopeVisitor;
         }
 
-        public IEnumerator<(string Suspension, Scope ShallowReferences)> GetEnumerator()
+        public IEnumerator<(string Suspension, Scope Scope)> GetEnumerator()
         {
             var names = new Graph(graph).SelectMany(pair => new[] { pair.From, pair.To }).Distinct().ToList();
             foreach (var name in names)
             {
                 var startPoint = Find(name);
                 var scope = ConstantScope.Empty;
-                var visitor = new ScopeUsage();
                 var visited = new HashSet<BasicBlock>();
                 var queue = new Queue<FlowPoint>();
                 queue.Enqueue(startPoint);
@@ -41,12 +43,12 @@ namespace Suspension.SourceGenerator
                         if (operation.Accept(new SuspensionPoint.Is()))
                             goto m1;
 
-                        scope = operation.Accept(visitor, scope);
+                        scope = operation.Accept(scopeVisitor, scope);
                     }
 
                     if (block.ConditionalSuccessor is { } conditional)
                     {
-                        scope = block.BranchValue.Accept(visitor, scope);
+                        scope = block.BranchValue.Accept(scopeVisitor, scope);
                         queue.Enqueue(new FlowPoint(conditional.Destination, 0));
                     }
 

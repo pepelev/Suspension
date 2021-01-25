@@ -19,7 +19,8 @@ namespace Suspension.SourceGenerator
         public IEnumerator<(string Suspension, Scope References)> GetEnumerator()
         {
             var ways = new Graph(graph).ToLookup(pair => pair.From, pair => pair.To);
-            var shallowReferences = new Graph2(graph).ToDictionary(pair => pair.Suspension, pair => pair.ShallowReferences);
+            var shallowReferences = new Graph2(graph, new ScopeUsage())
+                .ToDictionary(pair => pair.Suspension, pair => pair.Scope);
             var result = new Dictionary<string, Lazy<Scope>>();
             foreach (var pair in shallowReferences)
             {
