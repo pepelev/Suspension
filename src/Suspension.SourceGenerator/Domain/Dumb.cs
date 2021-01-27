@@ -24,7 +24,10 @@ namespace Suspension.SourceGenerator.Domain
             this.start = start;
         }
 
-        public override SyntaxTree Document => CSharpSyntaxTree.Create(Namespace.NormalizeWhitespace());
+        public override SyntaxTree Document => CSharpSyntaxTree.Create(
+            Namespace.NormalizeWhitespace(),
+            path: $"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}.{name}.cs"
+        );
 
         private NamespaceDeclarationSyntax Namespace
         {
