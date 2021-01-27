@@ -3,7 +3,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 using Suspension.SourceGenerator.Predicates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 

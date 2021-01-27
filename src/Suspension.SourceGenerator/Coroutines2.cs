@@ -101,7 +101,7 @@ namespace Suspension.SourceGenerator
                 }
             }
 
-            yield return Tree("Exit", new FlowPoint(graph.Exit(), 0));
+            yield return new Exit(symbol).Document;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
