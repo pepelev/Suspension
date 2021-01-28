@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using Suspension.SourceGenerator;
+using Suspension.Tests.Samples.Cycles;
+using static Suspension.Tests.Samples.Cycles.VariableLessWhile.Coroutines;
 
 namespace Suspension.Tests
 {
@@ -14,7 +16,7 @@ namespace Suspension.Tests
         [Test]
         public void Test()
         {
-            var code = File.ReadAllText("Samples/Cycles/While.cs", Encoding.UTF8);
+            var code = File.ReadAllText("Samples/Cycles/VariableLessWhile.cs", Encoding.UTF8);
             var tree = CSharpSyntaxTree.ParseText(code);
             var compilation = CSharpCompilation.Create(
                 "Suspension.Tests.Samples",
@@ -79,6 +81,17 @@ namespace Suspension.Tests
             );
             foreach (var syntaxTree in new Coroutines(compilation))
             {
+            }
+        }
+
+        [Test]
+        public void Execution()
+        {
+            var random = new Random(142);
+            Coroutine<None> execute = new Execute.Entry(Console.WriteLine, () => random.Next(10) > 3);
+            while (!execute.Completed)
+            {
+                execute = execute.Run();
             }
         }
     }
