@@ -15,9 +15,9 @@ namespace Suspension.SourceGenerator
     public sealed class Coroutines2 : IEnumerable<SyntaxTree>
     {
         private readonly SyntaxTree document;
-        private readonly CSharpCompilation compilation;
+        private readonly Compilation compilation;
 
-        public Coroutines2(SyntaxTree document, CSharpCompilation compilation)
+        public Coroutines2(SyntaxTree document, Compilation compilation)
         {
             this.document = document;
             this.compilation = compilation;
@@ -28,21 +28,11 @@ namespace Suspension.SourceGenerator
             var emitResult = compilation.Emit(Stream.Null);
             if (!emitResult.Success)
             {
-                throw new Exception($"Compilation failed with {string.Join("; ", emitResult.Diagnostics)}");
+                //throw new Exception($"Compilation failed with {string.Join("; ", emitResult.Diagnostics)}");
             }
 
             var semantic = compilation.GetSemanticModel(document);
             var syntaxNodes = document.GetRoot().DescendantNodes().ToList();
-
-            var method = syntaxNodes
-                .OfType<MethodDeclarationSyntax>()
-                .That(
-                    new HasAttribute(semantic, new FullName("global::Suspension.SuspendableAttribute"))
-                )
-                .Single();
-            var graph = ControlFlowGraph.Create(method, semantic);
-            var valueTuples = new Graph(graph).ToList();
-
             return syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .That(

@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
+    <MSBuildWarningsAsErrors>CS8785</MSBuildWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\bin\suspension.tests</OutputPath>
+    <OutputPath>..\..\bin\suspension.playground</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,14 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Suspension.SourceGenerator\Suspension.SourceGenerator.csproj" />
+    <ProjectReference Include="..\Suspension.SourceGenerator\Suspension.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Suspension\Suspension.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Samples\**\*.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
   </ItemGroup>
 
 </Project>
