@@ -64,7 +64,7 @@ namespace Suspension.Tests
             var method = tree.GetRoot().DescendantNodes()
                 .OfType<MethodDeclarationSyntax>()
                 .That(
-                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
+                    new HasAttribute(semantic, new FullName("global::Suspension.SuspendableAttribute"))
                 )
                 .Single();
             return ControlFlowGraph.Create(method, semantic);

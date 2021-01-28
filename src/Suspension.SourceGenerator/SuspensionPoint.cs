@@ -16,7 +16,7 @@ namespace Suspension.SourceGenerator
 
             public override bool VisitInvocation(IInvocationOperation operation, None _)
             {
-                var predicate = new FullName("Suspension.Flow.Suspend");
+                var predicate = new FullName("global::Suspension.Flow.Suspend");
                 return predicate.Match(operation.TargetMethod);
             }
         }

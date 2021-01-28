@@ -45,7 +45,7 @@ namespace Suspension.SourceGenerator
             var methodDeclaration = syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .That(
-                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
+                    new HasAttribute(semantic, new FullName("global::Suspension.SuspendableAttribute"))
                 );
 
             foreach (var syntax in methodDeclaration)

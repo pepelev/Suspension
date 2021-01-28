@@ -1,4 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
 {
@@ -13,6 +16,12 @@ namespace Suspension.SourceGenerator.Domain
 
         public override ITypeSymbol Type => parameter.Type;
         public override string Name => parameter.Name;
+
+        public override ExpressionSyntax Access => MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            ThisExpression(),
+            IdentifierName(Name)
+        );
 
         private bool Equals(ParameterValue other) =>
             SymbolEqualityComparer.Default.Equals(parameter, other.parameter);

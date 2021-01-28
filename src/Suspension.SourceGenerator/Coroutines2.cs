@@ -37,7 +37,7 @@ namespace Suspension.SourceGenerator
             var method = syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .That(
-                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
+                    new HasAttribute(semantic, new FullName("global::Suspension.SuspendableAttribute"))
                 )
                 .Single();
             var graph = ControlFlowGraph.Create(method, semantic);
@@ -46,7 +46,7 @@ namespace Suspension.SourceGenerator
             return syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .That(
-                    new HasAttribute(semantic, new FullName("Suspension.SuspendableAttribute"))
+                    new HasAttribute(semantic, new FullName("global::Suspension.SuspendableAttribute"))
                 )
                 .SelectMany(method => MakeSuspendable(method, semantic))
                 .GetEnumerator();
@@ -58,11 +58,12 @@ namespace Suspension.SourceGenerator
             var graph = ControlFlowGraph.Create(method, semantic);
             var entry = graph.Entry();
 
-            var references = new Graph3(graph).ToDictionary(pair => pair.Suspension, pair => pair.References);
+            var graph3 = new Graph3(graph);
+            var references = graph3.ToDictionary(pair => pair.Suspension, pair => pair.References);
 
             SyntaxTree Tree(string name, FlowPoint point)
             {
-                var coroutine = new Dumb(name, symbol, point, references[name]);
+                var coroutine = new Dumb(name, symbol, point, references[name], graph3);
                 return coroutine.Document;
             }
 
