@@ -13,10 +13,4 @@ namespace Suspension.SourceGenerator.Predicates
                 : $"global::{joinedSegments}";
         }
     }
-
-    internal sealed class IsNamespace : SymbolVisitor<bool>
-    {
-        public override bool DefaultVisit(ISymbol symbol) => false;
-        public override bool VisitNamespace(INamespaceSymbol symbol) => true;
-    }
 }
