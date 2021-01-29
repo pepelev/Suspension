@@ -8,8 +8,17 @@ namespace Suspension.Playground
         [Test]
         public void Test()
         {
-            var entry = new SimpleWhile.Coroutines.Execute.Entry(Console.WriteLine, () => false);
-            entry.Run().Run();
+            Coroutine<None> entry = new SimpleFlow.Coroutines.Execute.Entry(Console.WriteLine);
+            var first = entry.Run();
+            var second = first.Run();
+            var exit = second.Run();
+
+            first.Run();
+
+            while (!entry.Completed)
+            {
+                entry = entry.Run();
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <MSBuildWarningsAsErrors>CS8785</MSBuildWarningsAsErrors>
+    <MSBuildWarningsAsErrors>CS8032</MSBuildWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -11,7 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />

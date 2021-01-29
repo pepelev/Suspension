@@ -31,7 +31,7 @@ namespace Suspension.SourceGenerator.Domain
 
         public override SyntaxTree Document => CSharpSyntaxTree.Create(
             Namespace.NormalizeWhitespace(),
-            path: $"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}.{name}.cs",
+            path: $"{method.ContainingType.Accept(new NoGlobalFullSymbolName())}.Coroutines.{method.Name}.{name}.cs",
             encoding: Encoding.UTF8
         );
 

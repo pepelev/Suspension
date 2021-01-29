@@ -6,11 +6,10 @@ namespace Suspension.SourceGenerator.Predicates
     {
         public override string DefaultVisit(ISymbol symbol)
         {
-            var segments = symbol.Accept(new SymbolNameSegments());
-            var joinedSegments = string.Join(".", segments);
+            var noGlobalSymbolName = symbol.Accept(new NoGlobalFullSymbolName());
             return symbol.Accept(new IsNamespace())
-                ? joinedSegments
-                : $"global::{joinedSegments}";
+                ? noGlobalSymbolName
+                : $"global::{noGlobalSymbolName}";
         }
     }
 }
