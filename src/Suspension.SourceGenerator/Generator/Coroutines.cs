@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,25 +11,19 @@ using Suspension.SourceGenerator.Predicates;
 
 namespace Suspension.SourceGenerator.Generator
 {
-    public sealed class Coroutines2 : IEnumerable<SyntaxTree>
+    internal sealed class Coroutines : IEnumerable<Coroutine>
     {
         private readonly SyntaxTree document;
         private readonly Compilation compilation;
 
-        public Coroutines2(SyntaxTree document, Compilation compilation)
+        public Coroutines(SyntaxTree document, Compilation compilation)
         {
             this.document = document;
             this.compilation = compilation;
         }
 
-        public IEnumerator<SyntaxTree> GetEnumerator()
+        public IEnumerator<Coroutine> GetEnumerator()
         {
-            var emitResult = compilation.Emit(Stream.Null);
-            if (!emitResult.Success)
-            {
-                //throw new Exception($"Compilation failed with {string.Join("; ", emitResult.Diagnostics)}");
-            }
-
             var semantic = compilation.GetSemanticModel(document);
             var syntaxNodes = document.GetRoot().DescendantNodes().ToList();
             return syntaxNodes
@@ -42,7 +35,7 @@ namespace Suspension.SourceGenerator.Generator
                 .GetEnumerator();
         }
 
-        private IEnumerable<SyntaxTree> MakeSuspendable(MethodDeclarationSyntax method, SemanticModel semantic)
+        private IEnumerable<Coroutine> MakeSuspendable(MethodDeclarationSyntax method, SemanticModel semantic)
         {
             var symbol = semantic.GetDeclaredSymbol(method) ?? throw new Exception("GetDeclaredSymbol failed");
             var graph = ControlFlowGraph.Create(method, semantic);
@@ -51,13 +44,12 @@ namespace Suspension.SourceGenerator.Generator
             var graph3 = new Graph3(graph);
             var references = graph3.ToDictionary(pair => pair.Suspension, pair => pair.References);
 
-            SyntaxTree Tree(string name, FlowPoint point)
+            Coroutine Dumb(string name, FlowPoint point)
             {
-                var coroutine = new Dumb(name, symbol, point, references[name], graph3);
-                return coroutine.Document;
+                return new Dumb(name, symbol, point, references[name], graph3);
             }
 
-            yield return Tree("Entry", new FlowPoint(entry, 0));
+            yield return Dumb("Entry", new FlowPoint(entry));
 
             // todo put this code into bfs class
             var visited = new HashSet<BasicBlock>();
@@ -76,7 +68,7 @@ namespace Suspension.SourceGenerator.Generator
                     if (operation.Accept(new SuspensionPoint.Is()))
                     {
                         var name = operation.Accept(new SuspensionPoint.Name());
-                        yield return Tree(name, new FlowPoint(block, i + 1));
+                        yield return Dumb(name, new FlowPoint(block, i + 1));
                     }
                 }
 
@@ -92,7 +84,7 @@ namespace Suspension.SourceGenerator.Generator
                 }
             }
 
-            yield return new Exit(symbol).Document;
+            yield return new Exit(symbol);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

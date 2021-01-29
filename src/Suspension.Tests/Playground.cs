@@ -29,7 +29,7 @@ namespace Suspension.Tests
                 },
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
-            var syntaxTrees = new Coroutines2(tree, compilation).ToList();
+            var syntaxTrees = new Coroutines(tree, compilation).ToList();
 
             Console.WriteLine(
                 string.Join(

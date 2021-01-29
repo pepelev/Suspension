@@ -19,12 +19,13 @@ namespace Suspension.SourceGenerator
         public void Execute(GeneratorExecutionContext context)
         {
             var compilation = context.Compilation;
-            var trees = compilation.SyntaxTrees.SelectMany(tree => new Coroutines2(tree, compilation)).ToList();
-            for (var i = 0; i < trees.Count; i++)
+            var coroutines = compilation.SyntaxTrees.SelectMany(tree => new Coroutines(tree, compilation)).ToList();
+            foreach (var coroutine in coroutines)
             {
-                var tree = trees[i];
+                var tree = coroutine.Document;
                 context.AddSource(tree.FilePath.Replace(":", "."), tree.GetText());
             }
+
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     new DiagnosticDescriptor(
