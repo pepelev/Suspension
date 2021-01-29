@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Suspension.Tests.Samples.Conditions
+namespace Suspension.Tests.Samples
 {
-    public static partial class Class
+    public partial class SimpleIf
     {
         [Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)

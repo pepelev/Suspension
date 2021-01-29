@@ -20,7 +20,6 @@ namespace Suspension.SourceGenerator.Generator
         {
             var compilation = context.Compilation;
             var trees = compilation.SyntaxTrees.SelectMany(tree => new Coroutines2(tree, compilation)).ToList();
-            var d = string.Join(Environment.NewLine + Environment.NewLine, trees);
             for (var i = 0; i < trees.Count; i++)
             {
                 var tree = trees[i];

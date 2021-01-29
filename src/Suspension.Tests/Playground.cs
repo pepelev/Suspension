@@ -6,11 +6,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using Suspension.SourceGenerator;
-using Suspension.Tests.Samples.Cycles;
-using static Suspension.Tests.Samples.Cycles.VariableLessWhile.Coroutines;
+using static Suspension.Tests.Samples.While.Coroutines;
 
 namespace Suspension.Tests
 {
+    [Explicit("For manual running")]
     public class Playground
     {
         [Test]

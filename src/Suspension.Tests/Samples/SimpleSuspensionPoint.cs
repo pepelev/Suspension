@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Suspension.Tests.Samples.SimpleSuspensionPoint
+namespace Suspension.Tests.Samples
 {
-    public static partial class Class
+    public partial class SimpleSuspensionPoint
     {
         [Suspendable]
         public static void Execute(Action<string> action)

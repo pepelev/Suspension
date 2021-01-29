@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Suspension.Tests.Samples.Exceptions
+namespace Suspension.Tests.Samples
 {
-    public class SingleTryCatch
+    public class TryFinally
     {
-        [Suspendable]
+        //[Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)
         {
             try
@@ -12,15 +12,14 @@ namespace Suspension.Tests.Samples.Exceptions
                 if (argument())
                 {
                     action("Ok");
+                    return;
                 }
-                else
-                {
-                    action("No ok");
-                }
+
+                action("argument false");
             }
-            catch (Exception e)
+            finally
             {
-                action($"throw {e.Message}");
+                action("finally");
             }
         }
     }

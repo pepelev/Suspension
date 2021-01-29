@@ -18,7 +18,7 @@ namespace Suspension.Tests
         [Test]
         public void Test()
         {
-            var graph = Graph("Samples/Conditions/Class.cs");
+            var graph = Graph("Samples/While.cs");
             var valueTuples = new Graph(graph).ToList();
             valueTuples.Should().BeEquivalentTo(
                 ("Entry", "InsideWhile"),
@@ -30,8 +30,9 @@ namespace Suspension.Tests
         }
 
         [Test]
-        [TestCase("Conditions/Class")]
-        [TestCase("Cycles/While")]
+        [Explicit("Assert scope correct")]
+        [TestCase("SimpleIf")]
+        [TestCase("While")]
         public void Test2(string @class)
         {
             var graph = Graph($"Samples/{@class}.cs");

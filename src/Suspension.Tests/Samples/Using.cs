@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Suspension.Tests.Samples.Exceptions
+namespace Suspension.Tests.Samples
 {
     public class Using
     {
-        [Suspendable]
+        //[Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action, IDisposable resource)
         {
             using (resource)

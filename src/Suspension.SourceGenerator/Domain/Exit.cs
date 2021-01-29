@@ -45,8 +45,6 @@ namespace Suspension.SourceGenerator.Domain
         private ClassDeclarationSyntax OriginalClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
             Identifier(method.ContainingType.Name),

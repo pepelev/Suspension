@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Suspension.Tests.Samples.Cycles
+namespace Suspension.Tests.Samples
 {
-    public partial class While
+    public partial class WhileWithVariable
     {
         [Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)
