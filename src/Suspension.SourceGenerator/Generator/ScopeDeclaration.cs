@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain;
+using Suspension.SourceGenerator.Domain.Values;
 
 namespace Suspension.SourceGenerator.Generator
 {

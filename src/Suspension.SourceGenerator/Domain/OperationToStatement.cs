@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
+using Suspension.SourceGenerator.Domain.Values;
 using Suspension.SourceGenerator.Predicates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 

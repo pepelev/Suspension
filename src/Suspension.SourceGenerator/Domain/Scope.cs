@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Suspension.SourceGenerator.Domain.Values;
 
 namespace Suspension.SourceGenerator.Domain
 {

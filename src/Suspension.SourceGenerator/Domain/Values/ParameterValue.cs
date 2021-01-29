@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Suspension.SourceGenerator.Domain
+namespace Suspension.SourceGenerator.Domain.Values
 {
     internal sealed class ParameterValue : Value
     {

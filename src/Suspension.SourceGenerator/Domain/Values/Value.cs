@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Suspension.SourceGenerator.Domain
+namespace Suspension.SourceGenerator.Domain.Values
 {
     internal abstract class Value
     {

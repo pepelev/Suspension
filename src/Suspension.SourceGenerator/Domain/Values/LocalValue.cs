@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Suspension.SourceGenerator.Domain
+namespace Suspension.SourceGenerator.Domain.Values
 {
     internal sealed class LocalValue : Value
     {

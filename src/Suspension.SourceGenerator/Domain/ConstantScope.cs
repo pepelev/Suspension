@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Suspension.SourceGenerator.Domain.Values;
 
 namespace Suspension.SourceGenerator.Domain
 {
