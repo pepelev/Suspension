@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
+using Suspension.SourceGenerator.Predicates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
@@ -14,14 +15,16 @@ namespace Suspension.SourceGenerator.Domain
             operation.Accept(new OperationToExpression(), scope)
         );
 
-        public override StatementSyntax VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope scope) =>
-            ExpressionStatement(
+        public override StatementSyntax VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope scope)
+        {
+            return ExpressionStatement(
                 AssignmentExpression(
                     SyntaxKind.SimpleAssignmentExpression,
                     operation.Target.Accept(new OperationToExpression(), scope),
                     operation.Value.Accept(new OperationToExpression(), scope)
                 )
             );
+        }
 
         public override StatementSyntax VisitLocalReference(ILocalReferenceOperation operation, Scope scope) =>
             ExpressionStatement(
@@ -54,13 +57,8 @@ namespace Suspension.SourceGenerator.Domain
 
         public override ExpressionSyntax VisitParameterReference(IParameterReferenceOperation operation, Scope scope)
         {
-            var value = new ParameterValue(operation.Parameter);
-            if (!scope.Contains(value))
-            {
-                throw new InvalidOperationException();
-            }
-
-            return value.Access;
+            var parameter = new ParameterValue(operation.Parameter);
+            return scope.Find(parameter).Access;
         }
 
         public override ExpressionSyntax VisitLocalReference(ILocalReferenceOperation operation, Scope scope)
@@ -68,8 +66,24 @@ namespace Suspension.SourceGenerator.Domain
             var local = new LocalValue(operation.Local);
             if (scope.Contains(local))
             {
-                return local.Access;
+                return scope.Find(local).Access;
             }
+
+            //return LocalDeclarationStatement(
+            //    List<AttributeListSyntax>(),
+            //    TokenList(),
+            //    VariableDeclaration(
+            //        IdentifierName(local.Type.Accept(new FullSymbolName())),
+            //        SeparatedList(
+            //            new[]
+            //            {
+            //                VariableDeclarator(
+            //                    Identifier(local.Name)
+            //                )
+            //            }
+            //        )
+            //    )
+            //);
 
             // todo fix it
             return local.Access;

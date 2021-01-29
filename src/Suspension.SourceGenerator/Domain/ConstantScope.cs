@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Suspension.SourceGenerator.Domain
 {
@@ -25,5 +26,7 @@ namespace Suspension.SourceGenerator.Domain
         );
 
         public override IEnumerator<Value> GetEnumerator() => values.GetEnumerator();
+
+        public override Value Find(Value target) => values.Single(value => value.Equals(target));
     }
 }

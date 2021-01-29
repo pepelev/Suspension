@@ -16,7 +16,7 @@ namespace Suspension.Tests
         [Test]
         public void Test()
         {
-            var code = File.ReadAllText("Samples/Cycles/VariableLessWhile.cs", Encoding.UTF8);
+            var code = File.ReadAllText("Samples/Cycles/While.cs", Encoding.UTF8);
             var tree = CSharpSyntaxTree.ParseText(code);
             var compilation = CSharpCompilation.Create(
                 "Suspension.Tests.Samples",

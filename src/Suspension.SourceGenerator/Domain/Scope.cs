@@ -9,6 +9,7 @@ namespace Suspension.SourceGenerator.Domain
         public abstract Scope Add(Value value);
         public abstract IEnumerator<Value> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public abstract Value Find(Value target);
 
         public Scope Union(IEnumerable<Value> values) => new ConstantScope(
             this.Concat(values)

@@ -263,13 +263,41 @@ namespace Suspension.SourceGenerator.Domain
         {
             get
             {
-                static SyntaxToken Block(BasicBlock block)
+                static SyntaxToken Label(BasicBlock block)
                 {
                     return Identifier($"block{block.Ordinal.ToString(CultureInfo.InvariantCulture)}");
                 }
 
                 var startPoint = flowPoint;
-                var startScope = graph.Single(pair => pair.Suspension == name).References;
+                var scope = graph.Single(pair => pair.Suspension == name).References;
+
+                foreach (var value in scope)
+                {
+                    yield return LocalDeclarationStatement(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        VariableDeclaration(
+                            IdentifierName(value.Type.Accept(new FullSymbolName())),
+                            SeparatedList(
+                                new[]
+                                {
+                                    VariableDeclarator(
+                                        Identifier($"{value.Name}Variable"),
+                                        null,
+                                        EqualsValueClause(
+                                            value.Access
+                                        )
+                                    )
+                                }
+                            )
+                        )
+                    );
+                }
+
+                scope = new ConstantScope(
+                    scope.Select(value => new RedirectedToLocal(value, "Variable"))
+                );
+
                 var visited = new HashSet<BasicBlock>();
                 var queue = new Queue<FlowPoint>();
                 queue.Enqueue(startPoint);
@@ -282,7 +310,7 @@ namespace Suspension.SourceGenerator.Domain
                         continue;
 
                     yield return LabeledStatement(
-                        Block(block),
+                        Label(block),
                         EmptyStatement()
                     );
 
@@ -298,20 +326,40 @@ namespace Suspension.SourceGenerator.Domain
                         );
                     }
 
+                    foreach (var local in block.EnclosingRegion.Locals.Select(local => new LocalValue(local)).Except(scope))
+                    {
+                        yield return LocalDeclarationStatement(
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            VariableDeclaration(
+                                IdentifierName(local.Type.Accept(new FullSymbolName())),
+                                SeparatedList(
+                                    new[]
+                                    {
+                                        VariableDeclarator(
+                                            Identifier(local.Name)
+                                        )
+                                    }
+                                )
+                            )
+                        );
+                    }
+
                     for (var i = point.Index; i < block.Operations.Length; i++)
                     {
                         var operation = block.Operations[i];
                         if (operation.Accept(new SuspensionPoint.Is()))
                         {
                             var suspensionPointName = operation.Accept(new SuspensionPoint.Name());
-                            var scope = graph.Single(pair => pair.Suspension == suspensionPointName).References;
+                            var targetScope = graph.Single(pair => pair.Suspension == suspensionPointName).References;
                             var className = $"{method.ContainingSymbol.Accept(new FullSymbolName())}.Coroutines.{method.Name}.{suspensionPointName}";
+                            var currentScope = scope;
                             yield return ReturnStatement(
                                 ObjectCreationExpression(
                                     ParseTypeName(className),
                                     ArgumentList(
                                         SeparatedList(
-                                            scope.Select(value => Argument(value.Access))
+                                            targetScope.Select(value => Argument(currentScope.Find(value).Access))
                                         )
                                     ),
                                     null
@@ -320,13 +368,14 @@ namespace Suspension.SourceGenerator.Domain
                             goto m1;
                         }
 
-                        var statement = operation.Accept(new OperationToStatement(), startScope);
+                        var statement = operation.Accept(new OperationToStatement(), scope);
+                        scope = operation.Accept(new ScopeDeclaration(), scope);
                         yield return statement;
                     }
 
                     if (block.ConditionalSuccessor is { } conditional)
                     {
-                        var expression = block.BranchValue.Accept(new OperationToExpression(), startScope);
+                        var expression = block.BranchValue.Accept(new OperationToExpression(), scope);
                         yield return IfStatement(
                             block.ConditionKind switch
                             {
@@ -340,7 +389,7 @@ namespace Suspension.SourceGenerator.Domain
                             GotoStatement(
                                 SyntaxKind.GotoStatement,
                                 IdentifierName(
-                                    Block(conditional.Destination)
+                                    Label(conditional.Destination)
                                 )
                             )
                         );
@@ -353,7 +402,7 @@ namespace Suspension.SourceGenerator.Domain
                         yield return GotoStatement(
                             SyntaxKind.GotoStatement,
                             IdentifierName(
-                                Block(fallThrough.Destination)
+                                Label(fallThrough.Destination)
                             )
                         );
 

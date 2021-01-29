@@ -1,5 +1,4 @@
 ﻿using System;
-using NUnit.Framework;
 
 namespace Suspension.Playground
 {
@@ -20,16 +19,6 @@ namespace Suspension.Playground
 
             Flow.Suspend("OutsideWhile");
             action("World");
-        }
-    }
-
-    public class Abc
-    {
-        [Test]
-        public void Test()
-        {
-            var entry = new SimpleWhile.Coroutines.Execute.Entry(Console.WriteLine, () => false);
-            entry.Run().Run();
         }
     }
 }
