@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Suspension.SourceGenerator.Domain;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     internal sealed class Graph3 : IEnumerable<(string Suspension, Scope References)>
     {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
+using Suspension.SourceGenerator.Generator;
 
 namespace Suspension.SourceGenerator.Predicates
 {

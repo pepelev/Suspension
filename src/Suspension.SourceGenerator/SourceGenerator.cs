@@ -1,12 +1,12 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Suspension.SourceGenerator.Generator;
 
-namespace Suspension.SourceGenerator.Generator
+namespace Suspension.SourceGenerator
 {
     [Generator]
-    public class MySourceGenerator : ISourceGenerator
+    public sealed class SourceGenerator : ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {

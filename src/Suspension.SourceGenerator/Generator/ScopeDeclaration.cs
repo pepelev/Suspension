@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     internal sealed class ScopeDeclaration : OperationVisitor<Scope, Scope>
     {

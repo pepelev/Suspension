@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     public sealed class OperationInstruction : Instruction
     {

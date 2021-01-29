@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.FlowAnalysis;
 using Suspension.SourceGenerator.Domain;
 using Suspension.SourceGenerator.Predicates;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     public sealed class Coroutines2 : IEnumerable<SyntaxTree>
     {

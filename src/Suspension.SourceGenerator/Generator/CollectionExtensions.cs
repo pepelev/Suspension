@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     internal static class CollectionExtensions
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Suspension.SourceGenerator.Predicates;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     internal sealed class Graph : IEnumerable<(string From, string To)>
     {
@@ -18,8 +18,7 @@ namespace Suspension.SourceGenerator
                         block => new
                         {
                             Block = block,
-                            SuspensionPoints = block.Operations
-                                .That(new SuspensionPoint.Is())
+                            SuspensionPoints = Linq.That(block.Operations, new SuspensionPoint.Is())
                                 .Select(new SuspensionPoint.Name())
                                 .ToList()
                         }

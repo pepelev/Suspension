@@ -1,4 +1,4 @@
-﻿namespace Suspension.SourceGenerator
+﻿namespace Suspension.SourceGenerator.Generator
 {
     public abstract class Instruction
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.FlowAnalysis;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     internal readonly struct FlowPoint
     {

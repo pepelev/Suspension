@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Suspension.SourceGenerator
+namespace Suspension.SourceGenerator.Generator
 {
     public sealed class ConditionalInstruction : Instruction
     {

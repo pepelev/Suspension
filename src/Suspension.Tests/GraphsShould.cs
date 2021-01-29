@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.FlowAnalysis;
 using NUnit.Framework;
 using Suspension.SourceGenerator;
 using Suspension.SourceGenerator.Domain;
+using Suspension.SourceGenerator.Generator;
 using Suspension.SourceGenerator.Predicates;
 
 namespace Suspension.Tests
