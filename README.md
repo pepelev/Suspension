@@ -47,7 +47,7 @@ so regular usage looks like:
 ```csharp
 while (!coroutine.Completed)
 {
-    if (WeDontNeedItAnymore())
+    if (WeDontNeedItAnymore("for example, the user hits 'Cancel'"))
     {
         // we just throw away the partially completed coroutine
         return;
