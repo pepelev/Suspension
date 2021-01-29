@@ -138,7 +138,7 @@ namespace Suspension.SourceGenerator.Domain
                         ),
                         ParseTypeName("System.Boolean"),
                         null,
-                        Identifier(nameof(Coroutine<None>.Completed)),
+                        Identifier("Completed"),
                         null,
                         ArrowExpressionClause(
                             LiteralExpression(SyntaxKind.TrueLiteralExpression)
@@ -154,7 +154,7 @@ namespace Suspension.SourceGenerator.Domain
                         ),
                         ParseTypeName("Suspension.None"),
                         null,
-                        Identifier(nameof(Coroutine<None>.Result)),
+                        Identifier("Result"),
                         null,
                         ArrowExpressionClause(
                             ObjectCreationExpression(
@@ -174,7 +174,7 @@ namespace Suspension.SourceGenerator.Domain
                         ),
                         ParseTypeName("Suspension.Coroutine<Suspension.None>"),
                         null,
-                        Identifier(nameof(Coroutine<None>.Run)),
+                        Identifier("Run"),
                         null,
                         ParameterList(),
                         List<TypeParameterConstraintClauseSyntax>(),
