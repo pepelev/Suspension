@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain;
 using Suspension.SourceGenerator.Domain.Values;
@@ -9,7 +8,7 @@ namespace Suspension.SourceGenerator.Generator
     internal sealed class ScopeDeclaration : OperationVisitor<Scope, Scope>
     {
         public override Scope DefaultVisit(IOperation operation, Scope currentScope) =>
-            throw new InvalidOperationException($"Unsupported operation {operation}");
+            throw operation.NotImplemented();
 
         public override Scope VisitLocalReference(ILocalReferenceOperation operation, Scope currentScope)
             => currentScope.Add(
@@ -23,6 +22,13 @@ namespace Suspension.SourceGenerator.Generator
             operation.Operation.Accept(this, currentScope);
 
         public override Scope VisitInvocation(IInvocationOperation operation, Scope currentScope) => currentScope;
-        public override Scope VisitCompoundAssignment(ICompoundAssignmentOperation operation, Scope currentScope) => currentScope;
+
+        public override Scope VisitCompoundAssignment(ICompoundAssignmentOperation operation, Scope currentScope)
+            => currentScope;
+
+        public override Scope VisitBinaryOperator(IBinaryOperation operation, Scope currentScope) => currentScope;
+
+        public override Scope VisitIncrementOrDecrement(IIncrementOrDecrementOperation operation, Scope currentScope)
+            => currentScope;
     }
 }

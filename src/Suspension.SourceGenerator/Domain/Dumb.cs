@@ -69,8 +69,6 @@ namespace Suspension.SourceGenerator.Domain
         private ClassDeclarationSyntax CoroutinesClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
             Identifier("Coroutines"),
@@ -85,29 +83,11 @@ namespace Suspension.SourceGenerator.Domain
         private ClassDeclarationSyntax MethodClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.AbstractKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
             Identifier(method.Name),
             typeParameterList: null,
-            BaseList(
-                SeparatedList<BaseTypeSyntax>(
-                    new[]
-                    {
-                        SimpleBaseType(
-                            GenericName(
-                                Identifier("Suspension.Coroutine"),
-                                TypeArgumentList(
-                                    SeparatedList(
-                                        new[] { ParseTypeName("Suspension.None") }
-                                    )
-                                )
-                            )
-                        )
-                    }
-                )
-            ),
+            null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[] {CoroutineClass}
@@ -134,54 +114,63 @@ namespace Suspension.SourceGenerator.Domain
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                Payload.Append(Constructor).Concat(
-                    new MemberDeclarationSyntax[]
-                    {
-                        PropertyDeclaration(
-                            List<AttributeListSyntax>(),
-                            TokenList(
-                                Token(SyntaxKind.PublicKeyword),
-                                Token(SyntaxKind.OverrideKeyword)
-                            ),
-                            ParseTypeName("System.Boolean"),
-                            null,
-                            Identifier("Completed"),
-                            null,
-                            ArrowExpressionClause(
-                                LiteralExpression(SyntaxKind.FalseLiteralExpression)
-                            ),
-                            null,
-                            Token(SyntaxKind.SemicolonToken)
-                        ),
-                        PropertyDeclaration(
-                            List<AttributeListSyntax>(),
-                            TokenList(
-                                Token(SyntaxKind.PublicKeyword),
-                                Token(SyntaxKind.OverrideKeyword)
-                            ),
-                            ParseTypeName("Suspension.None"),
-                            null,
-                            Identifier("Result"),
-                            null,
-                            ArrowExpressionClause(
-                                ThrowExpression(
-                                    ObjectCreationExpression(
-                                        ParseTypeName("System.InvalidOperationException"),
-                                        ArgumentList(),
-                                        null
-                                    )
-                                )
-                            ),
-                            null,
-                            Token(SyntaxKind.SemicolonToken)
-                        ),
-                        Run
-                    }
+                Fields.Concat(
+                    new MemberDeclarationSyntax[] {Constructor, Completed, Result, Run, Accept}
                 )
             )
         );
 
-        private IEnumerable<MemberDeclarationSyntax> Payload => start.Select(
+        private MethodDeclarationSyntax Accept => MethodDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("T"),
+            null,
+            Identifier("Accept"),
+            TypeParameterList(
+                SeparatedList(
+                    new[] { TypeParameter("T") }
+                )
+            ),
+            ParameterList(
+                SeparatedList(
+                    new[]
+                    {
+                        Parameter(
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            ParseTypeName("Visitor<T>"),
+                            Identifier("visitor"),
+                            null
+                        )
+                    }
+                )
+            ),
+            List<TypeParameterConstraintClauseSyntax>(),
+            null,
+            ArrowExpressionClause(
+                InvocationExpression(
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        IdentifierName("visitor"),
+                        IdentifierName($"Visit{name}")
+                    ),
+                    ArgumentList(
+                        SeparatedList(
+                            start.Select(
+                                value => Argument(value.Access)
+                            )
+                        )
+                    )
+                )
+            ),
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+
+        private IEnumerable<MemberDeclarationSyntax> Fields => start.Select(
             value => FieldDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList(
@@ -237,6 +226,46 @@ namespace Suspension.SourceGenerator.Domain
                     )
                 )
             )
+        );
+
+        private static PropertyDeclarationSyntax Completed => PropertyDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("System.Boolean"),
+            null,
+            Identifier("Completed"),
+            null,
+            ArrowExpressionClause(
+                LiteralExpression(SyntaxKind.FalseLiteralExpression)
+            ),
+            null,
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("Suspension.None"),
+            null,
+            Identifier("Result"),
+            null,
+            ArrowExpressionClause(
+                ThrowExpression(
+                    ObjectCreationExpression(
+                        ParseTypeName("System.InvalidOperationException"),
+                        ArgumentList(),
+                        null
+                    )
+                )
+            ),
+            null,
+            Token(SyntaxKind.SemicolonToken)
         );
 
         private MethodDeclarationSyntax Run => MethodDeclaration(
@@ -382,7 +411,7 @@ namespace Suspension.SourceGenerator.Domain
                                 ControlFlowConditionKind.WhenTrue => expression,
                                 ControlFlowConditionKind.WhenFalse => PrefixUnaryExpression(
                                     SyntaxKind.LogicalNotExpression,
-                                    expression
+                                    ParenthesizedExpression(expression)
                                 ),
                                 _ => throw new InvalidOperationException()
                             },

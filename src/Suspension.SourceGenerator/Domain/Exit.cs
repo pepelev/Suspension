@@ -59,8 +59,6 @@ namespace Suspension.SourceGenerator.Domain
         private ClassDeclarationSyntax CoroutinesClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.StaticKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
             Identifier("Coroutines"),
@@ -75,29 +73,11 @@ namespace Suspension.SourceGenerator.Domain
         private ClassDeclarationSyntax MethodClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.AbstractKeyword),
                 Token(SyntaxKind.PartialKeyword)
             ),
             Identifier(method.Name),
             typeParameterList: null,
-            BaseList(
-                SeparatedList<BaseTypeSyntax>(
-                    new[]
-                    {
-                        SimpleBaseType(
-                            GenericName(
-                                Identifier("Suspension.Coroutine"),
-                                TypeArgumentList(
-                                    SeparatedList(
-                                        new[] { ParseTypeName("Suspension.None") }
-                                    )
-                                )
-                            )
-                        )
-                    }
-                )
-            ),
+            null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
                 new[] { CoroutineClass }
@@ -126,70 +106,113 @@ namespace Suspension.SourceGenerator.Domain
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                new MemberDeclarationSyntax[]
-                {
-                    PropertyDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(
-                            Token(SyntaxKind.PublicKeyword),
-                            Token(SyntaxKind.OverrideKeyword)
-                        ),
-                        ParseTypeName("System.Boolean"),
-                        null,
-                        Identifier("Completed"),
-                        null,
-                        ArrowExpressionClause(
-                            LiteralExpression(SyntaxKind.TrueLiteralExpression)
-                        ),
-                        null,
-                        Token(SyntaxKind.SemicolonToken)
-                    ),
-                    PropertyDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(
-                            Token(SyntaxKind.PublicKeyword),
-                            Token(SyntaxKind.OverrideKeyword)
-                        ),
-                        ParseTypeName("Suspension.None"),
-                        null,
-                        Identifier("Result"),
-                        null,
-                        ArrowExpressionClause(
-                            ObjectCreationExpression(
-                                ParseTypeName("Suspension.None"),
-                                ArgumentList(),
-                                null
-                            )
-                        ),
-                        null,
-                        Token(SyntaxKind.SemicolonToken)
-                    ),
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(
-                            Token(SyntaxKind.PublicKeyword),
-                            Token(SyntaxKind.OverrideKeyword)
-                        ),
-                        ParseTypeName("Suspension.Coroutine<Suspension.None>"),
-                        null,
-                        Identifier("Run"),
-                        null,
-                        ParameterList(),
-                        List<TypeParameterConstraintClauseSyntax>(),
-                        null,
-                        ArrowExpressionClause(
-                            ThrowExpression(
-                                ObjectCreationExpression(
-                                    ParseTypeName("System.InvalidOperationException"),
-                                    ArgumentList(),
-                                    null
-                                )
-                            )
-                        ),
-                        Token(SyntaxKind.SemicolonToken)
-                    )
-                }
+                new MemberDeclarationSyntax[] {Completed, Result, Run, Accept}
             )
+        );
+
+        private static PropertyDeclarationSyntax Completed => PropertyDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("System.Boolean"),
+            null,
+            Identifier("Completed"),
+            null,
+            ArrowExpressionClause(
+                LiteralExpression(SyntaxKind.TrueLiteralExpression)
+            ),
+            null,
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("Suspension.None"),
+            null,
+            Identifier("Result"),
+            null,
+            ArrowExpressionClause(
+                ObjectCreationExpression(
+                    ParseTypeName("Suspension.None"),
+                    ArgumentList(),
+                    null
+                )
+            ),
+            null,
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+        private static MethodDeclarationSyntax Run => MethodDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("Suspension.Coroutine<Suspension.None>"),
+            null,
+            Identifier("Run"),
+            null,
+            ParameterList(),
+            List<TypeParameterConstraintClauseSyntax>(),
+            null,
+            ArrowExpressionClause(
+                ThrowExpression(
+                    ObjectCreationExpression(
+                        ParseTypeName("System.InvalidOperationException"),
+                        ArgumentList(),
+                        null
+                    )
+                )
+            ),
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+        private static MethodDeclarationSyntax Accept => MethodDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)
+            ),
+            ParseTypeName("T"),
+            null,
+            Identifier("Accept"),
+            TypeParameterList(
+                SeparatedList(
+                    new[] {TypeParameter("T")}
+                )
+            ),
+            ParameterList(
+                SeparatedList(
+                    new[]
+                    {
+                        Parameter(
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            ParseTypeName("Visitor<T>"),
+                            Identifier("visitor"),
+                            null
+                        )
+                    }
+                )
+            ),
+            List<TypeParameterConstraintClauseSyntax>(),
+            null,
+            ArrowExpressionClause(
+                InvocationExpression(
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        IdentifierName("visitor"),
+                        IdentifierName("VisitExit")
+                    )
+                )
+            ),
+            Token(SyntaxKind.SemicolonToken)
         );
     }
 }

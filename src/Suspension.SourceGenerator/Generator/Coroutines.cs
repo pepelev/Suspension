@@ -49,6 +49,8 @@ namespace Suspension.SourceGenerator.Generator
                 return new Dumb(name, symbol, point, references[name], graph3);
             }
 
+
+            yield return new Base(symbol, graph3);
             yield return Dumb("Entry", new FlowPoint(entry));
 
             // todo put this code into bfs class

@@ -5,21 +5,28 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain.Values;
+using Suspension.SourceGenerator.Generator;
+using Suspension.SourceGenerator.Predicates;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
 {
     internal sealed class OperationToExpression : OperationVisitor<Scope, ExpressionSyntax>
     {
         public override ExpressionSyntax DefaultVisit(IOperation operation, Scope argument) =>
-            throw new NotSupportedException($"Operation {operation} not supported");
+            throw operation.NotImplemented();
 
         public override ExpressionSyntax VisitInvocation(IInvocationOperation operation, Scope scope) =>
-            SyntaxFactory.InvocationExpression(
-                operation.Instance.Accept(this, scope),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SeparatedList(
+            InvocationExpression(
+                operation.Instance switch
+                {
+                    null => ParseName(operation.TargetMethod.Accept(new FullSymbolName())),
+                    var instance => instance.Accept(this, scope)
+                },
+                ArgumentList(
+                    SeparatedList(
                         operation.Arguments.Select(
-                            argument => SyntaxFactory.Argument(argument.Value.Accept(this, scope))
+                            argument => Argument(argument.Value.Accept(this, scope))
                         )
                     )
                 )
@@ -59,21 +66,41 @@ namespace Suspension.SourceGenerator.Domain
             return local.Access;
         }
 
-        public override ExpressionSyntax VisitLiteral(ILiteralOperation operation, Scope _) => SyntaxFactory.LiteralExpression(
+        public override ExpressionSyntax VisitLiteral(ILiteralOperation operation, Scope _) => LiteralExpression(
             operation.Syntax.Kind(),
             operation.ConstantValue.Value switch
             {
-                int value => SyntaxFactory.Literal(value),
-                string value => SyntaxFactory.Literal(value),
+                int value => Literal(value),
+                string value => Literal(value),
                 var a => throw new NotImplementedException()
             }
         );
 
         public override ExpressionSyntax VisitCompoundAssignment(ICompoundAssignmentOperation operation, Scope scope) =>
-            SyntaxFactory.AssignmentExpression(
+            AssignmentExpression(
                 operation.Syntax.Kind(),
                 operation.Target.Accept(this, scope),
                 operation.Value.Accept(this, scope)
             );
+
+        public override ExpressionSyntax VisitBinaryOperator(IBinaryOperation operation, Scope scope) =>
+            BinaryExpression(
+                operation.Syntax.Kind(),
+                operation.LeftOperand.Accept(this, scope),
+                operation.RightOperand.Accept(this, scope)
+            );
+
+        public override ExpressionSyntax VisitIncrementOrDecrement(IIncrementOrDecrementOperation operation, Scope scope)
+        {
+            var target = operation.Target.Accept(this, scope);
+            return (operation.IsPostfix, operation.Kind) switch
+            {
+                (true, OperationKind.Increment) => PostfixUnaryExpression(SyntaxKind.PostIncrementExpression, target),
+                (false, OperationKind.Increment) => PrefixUnaryExpression(SyntaxKind.PreIncrementExpression, target),
+                (true, OperationKind.Decrement) => PostfixUnaryExpression(SyntaxKind.PostDecrementExpression, target),
+                (false, OperationKind.Decrement) => PrefixUnaryExpression(SyntaxKind.PreDecrementExpression, target),
+                _ => throw new InvalidOperationException()
+            };
+        }
     }
 }

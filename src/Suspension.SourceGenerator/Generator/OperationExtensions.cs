@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 
 namespace Suspension.SourceGenerator.Generator
@@ -10,5 +11,9 @@ namespace Suspension.SourceGenerator.Generator
 
         public static T Visit<T>(this OperationVisitor<None, T> visitor, IOperation operation) =>
             operation.Accept(visitor, new None());
+
+        public static Exception NotImplemented(this IOperation operation) => new NotImplementedException(
+            $"Operation {operation.GetType().Name} with syntax {operation.Syntax} not supported yet"
+        );
     }
 }
