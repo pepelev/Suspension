@@ -61,5 +61,12 @@ namespace Suspension.SourceGenerator.Generator
 
         public override Scope VisitIncrementOrDecrement(IIncrementOrDecrementOperation operation, Scope currentScope) =>
             operation.Target.Accept(this, currentScope);
+
+        public override Scope VisitFieldReference(IFieldReferenceOperation operation, Scope currentScope) =>
+            operation.Field switch
+            {
+                {IsStatic: true} => currentScope,
+                var field => currentScope.Add(new FieldValue(field))
+            };
     }
 }

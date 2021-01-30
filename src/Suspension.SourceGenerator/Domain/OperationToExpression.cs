@@ -102,5 +102,12 @@ namespace Suspension.SourceGenerator.Domain
                 _ => throw new InvalidOperationException()
             };
         }
+
+        public override ExpressionSyntax VisitFieldReference(IFieldReferenceOperation operation, Scope scope)
+        {
+            var field = new FieldValue(operation.Field);
+            var value = scope.Find(field);
+            return value.Access;
+        }
     }
 }

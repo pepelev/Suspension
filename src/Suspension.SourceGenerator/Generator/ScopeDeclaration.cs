@@ -30,5 +30,8 @@ namespace Suspension.SourceGenerator.Generator
 
         public override Scope VisitIncrementOrDecrement(IIncrementOrDecrementOperation operation, Scope currentScope)
             => currentScope;
+
+        public override Scope VisitFieldReference(IFieldReferenceOperation operation, Scope currentScope)
+            => currentScope;
     }
 }
