@@ -20,7 +20,13 @@ namespace Suspension.Tests.Samples
         public void Test()
         {
             Coroutines.WriteToConsole coroutine = new Coroutines.WriteToConsole.Entry(10);
-            coroutine = (Coroutines.WriteToConsole) coroutine.Run();
+            while (!coroutine.Completed)
+            {
+                Console.WriteLine(
+                    coroutine.Accept(new Print())
+                );
+                coroutine = coroutine.Run();
+            }
 
             Console.WriteLine(
                 coroutine.Accept(new Print())

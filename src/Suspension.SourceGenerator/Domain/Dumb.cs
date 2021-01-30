@@ -274,7 +274,7 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.PublicKeyword),
                 Token(SyntaxKind.OverrideKeyword)
             ),
-            ParseTypeName("Suspension.Coroutine<Suspension.None>"),
+            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
             null,
             Identifier("Run"),
             null,
@@ -423,7 +423,7 @@ namespace Suspension.SourceGenerator.Domain
                             )
                         );
 
-                        queue.Enqueue(new FlowPoint(conditional.Destination, 0));
+                        queue.Enqueue(new FlowPoint(conditional.Destination));
                     }
 
                     if (block.FallThroughSuccessor is { } fallThrough)
@@ -435,7 +435,7 @@ namespace Suspension.SourceGenerator.Domain
                             )
                         );
 
-                        queue.Enqueue(new FlowPoint(fallThrough.Destination, 0));
+                        queue.Enqueue(new FlowPoint(fallThrough.Destination));
                     }
 
                     m1: visited.Add(block);

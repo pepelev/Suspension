@@ -148,13 +148,13 @@ namespace Suspension.SourceGenerator.Domain
             Token(SyntaxKind.SemicolonToken)
         );
 
-        private static MethodDeclarationSyntax Run => MethodDeclaration(
+        private MethodDeclarationSyntax Run => MethodDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
                 Token(SyntaxKind.PublicKeyword),
                 Token(SyntaxKind.OverrideKeyword)
             ),
-            ParseTypeName("Suspension.Coroutine<Suspension.None>"),
+            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
             null,
             Identifier("Run"),
             null,

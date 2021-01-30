@@ -12,7 +12,7 @@ namespace Suspension.SourceGenerator
         {
             if (!Debugger.IsAttached)
             {
-                //Debugger.Launch();
+                Debugger.Launch();
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -100,11 +99,106 @@ namespace Suspension.SourceGenerator.Generator
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                new MemberDeclarationSyntax[] { VisitMethod, Visitor }
+                new MemberDeclarationSyntax[] { Completed, Result, ExplicitRun, Run, Visit, Visitor }
             )
         );
 
-        private MethodDeclarationSyntax VisitMethod => MethodDeclaration(
+        private static PropertyDeclarationSyntax Completed => PropertyDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.AbstractKeyword)
+            ),
+            ParseTypeName("global::System.Boolean"),
+            null,
+            Identifier("Completed"),
+            AccessorList(
+                List(
+                    new[]
+                    {
+                        AccessorDeclaration(
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            Token(SyntaxKind.GetKeyword),
+                            null,
+                            null,
+                            Token(SyntaxKind.SemicolonToken)
+                        )
+                    }
+                )
+            ),
+            null,
+            null
+        );
+
+        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.AbstractKeyword)
+            ),
+            ParseTypeName("global::Suspension.None"),
+            null,
+            Identifier("Result"),
+            AccessorList(
+                List(
+                    new[]
+                    {
+                        AccessorDeclaration(
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            Token(SyntaxKind.GetKeyword),
+                            null,
+                            null,
+                            Token(SyntaxKind.SemicolonToken)
+                        )
+                    }
+                )
+            ),
+            null,
+            null
+        );
+
+        private static MethodDeclarationSyntax ExplicitRun => MethodDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(),
+            ParseTypeName("global::Suspension.Coroutine<global::Suspension.None>"),
+            ExplicitInterfaceSpecifier(
+                IdentifierName("global::Suspension.Coroutine<global::Suspension.None>")
+            ),
+            Identifier("Run"),
+            null,
+            ParameterList(),
+            List<TypeParameterConstraintClauseSyntax>(),
+            null,
+            ArrowExpressionClause(
+                InvocationExpression(
+                    IdentifierName("Run")
+                )
+            ),
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+        private MethodDeclarationSyntax Run => MethodDeclaration(
+            List<AttributeListSyntax>(),
+            TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.AbstractKeyword)
+            ),
+            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
+            null,
+            Identifier("Run"),
+            null,
+            ParameterList(),
+            List<TypeParameterConstraintClauseSyntax>(),
+            null,
+            null,
+            Token(SyntaxKind.SemicolonToken)
+        );
+
+        private static MethodDeclarationSyntax Visit => MethodDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
                 Token(SyntaxKind.PublicKeyword),
@@ -138,7 +232,7 @@ namespace Suspension.SourceGenerator.Generator
             Token(SyntaxKind.SemicolonToken)
         );
 
-        public ClassDeclarationSyntax Visitor => ClassDeclaration(
+        private ClassDeclarationSyntax Visitor => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
                 Token(SyntaxKind.PublicKeyword),
