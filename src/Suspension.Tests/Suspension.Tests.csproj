@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Nullable>enable</Nullable>
+    <MSBuildWarningsAsErrors>CS8785</MSBuildWarningsAsErrors>
+    <MSBuildWarningsAsErrors>CS8032</MSBuildWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>

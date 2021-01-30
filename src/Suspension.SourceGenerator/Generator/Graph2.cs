@@ -26,38 +26,39 @@ namespace Suspension.SourceGenerator.Generator
             {
                 var startPoint = Find(name);
                 var scope = ConstantScope.Empty;
-                var visited = new HashSet<BasicBlock>();
+                var visited = new HashSet<FlowPoint>();
                 var queue = new Queue<FlowPoint>();
                 queue.Enqueue(startPoint);
 
-                while (queue.Count > 0)
+                m1: while (queue.Count > 0)
                 {
                     var point = queue.Dequeue();
                     var block = point.Block;
-                    if (visited.Contains(block))
-                        continue;
 
                     for (var i = point.Index; i < block.Operations.Length; i++)
                     {
+                        var currentPoint = new FlowPoint(block, i);
+                        if (visited.Contains(currentPoint))
+                            goto m1;
+
                         var operation = block.Operations[i];
                         if (operation.Accept(new SuspensionPoint.Is()))
                             goto m1;
 
                         scope = operation.Accept(scopeVisitor, scope);
+                        visited.Add(currentPoint);
                     }
 
                     if (block.ConditionalSuccessor is { } conditional)
                     {
                         scope = block.BranchValue.Accept(scopeVisitor, scope);
-                        queue.Enqueue(new FlowPoint(conditional.Destination, 0));
+                        queue.Enqueue(new FlowPoint(conditional.Destination));
                     }
 
                     if (block.FallThroughSuccessor is { } fallThrough)
                     {
-                        queue.Enqueue(new FlowPoint(fallThrough.Destination, 0));
+                        queue.Enqueue(new FlowPoint(fallThrough.Destination));
                     }
-
-                    m1: visited.Add(block);
                 }
 
                 yield return (name, scope);

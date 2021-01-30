@@ -292,9 +292,11 @@ namespace Suspension.SourceGenerator.Domain
         {
             get
             {
-                static SyntaxToken Label(BasicBlock block)
+                static SyntaxToken Label(FlowPoint point)
                 {
-                    return Identifier($"block{block.Ordinal.ToString(CultureInfo.InvariantCulture)}");
+                    var ordinal = point.Block.Ordinal.ToString(CultureInfo.InvariantCulture);
+                    var index = point.Index.ToString(CultureInfo.InvariantCulture);
+                    return Identifier($"block{ordinal}_{index}");
                 }
 
                 var startPoint = flowPoint;
@@ -338,8 +340,37 @@ namespace Suspension.SourceGenerator.Domain
                     if (visited.Contains(block))
                         continue;
 
+                    foreach (var local in block.EnclosingRegion.Locals.Select(local => new LocalValue(local)).Except(scope))
+                    {
+                        yield return LocalDeclarationStatement(
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            VariableDeclaration(
+                                IdentifierName(local.Type.Accept(new FullSymbolName())),
+                                SeparatedList(
+                                    new[]
+                                    {
+                                        VariableDeclarator(
+                                            Identifier(local.Name),
+                                            null,
+                                            EqualsValueClause(
+                                                DefaultExpression(ParseTypeName(local.Type.Accept(new FullSymbolName()))) // todo may be there is elegant solution
+                                            )
+                                        )
+                                    }
+                                )
+                            )
+                        );
+                    }
+
+                    yield return GotoStatement(
+                        SyntaxKind.GotoStatement,
+                        IdentifierName(
+                            Label(point)
+                        )
+                    );
                     yield return LabeledStatement(
-                        Label(block),
+                        Label(new FlowPoint(block)),
                         EmptyStatement()
                     );
 
@@ -355,26 +386,7 @@ namespace Suspension.SourceGenerator.Domain
                         );
                     }
 
-                    foreach (var local in block.EnclosingRegion.Locals.Select(local => new LocalValue(local)).Except(scope))
-                    {
-                        yield return LocalDeclarationStatement(
-                            List<AttributeListSyntax>(),
-                            TokenList(),
-                            VariableDeclaration(
-                                IdentifierName(local.Type.Accept(new FullSymbolName())),
-                                SeparatedList(
-                                    new[]
-                                    {
-                                        VariableDeclarator(
-                                            Identifier(local.Name)
-                                        )
-                                    }
-                                )
-                            )
-                        );
-                    }
-
-                    for (var i = point.Index; i < block.Operations.Length; i++)
+                    for (var i = 0; i < block.Operations.Length; i++)
                     {
                         var operation = block.Operations[i];
                         if (operation.Accept(new SuspensionPoint.Is()))
@@ -394,17 +406,24 @@ namespace Suspension.SourceGenerator.Domain
                                     null
                                 )
                             );
-                            goto m1;
-                        }
 
-                        var statement = operation.Accept(new OperationToStatement(), scope);
-                        scope = operation.Accept(new ScopeDeclaration(), scope);
-                        yield return statement;
+                            yield return LabeledStatement(
+                                Label(new FlowPoint(block, i + 1)),
+                                EmptyStatement()
+                            );
+                        }
+                        else
+                        {
+                            var statement = operation.Accept(new OperationToStatement(), scope);
+                            scope = operation.Accept(new ScopeDeclaration(), scope);
+                            yield return statement;
+                        }
                     }
 
                     if (block.ConditionalSuccessor is { } conditional)
                     {
                         var expression = block.BranchValue.Accept(new OperationToExpression(), scope);
+                        var destination = new FlowPoint(conditional.Destination);
                         yield return IfStatement(
                             block.ConditionKind switch
                             {
@@ -418,27 +437,28 @@ namespace Suspension.SourceGenerator.Domain
                             GotoStatement(
                                 SyntaxKind.GotoStatement,
                                 IdentifierName(
-                                    Label(conditional.Destination)
+                                    Label(destination)
                                 )
                             )
                         );
 
-                        queue.Enqueue(new FlowPoint(conditional.Destination));
+                        queue.Enqueue(destination);
                     }
 
                     if (block.FallThroughSuccessor is { } fallThrough)
                     {
+                        var destination = new FlowPoint(fallThrough.Destination);
                         yield return GotoStatement(
                             SyntaxKind.GotoStatement,
                             IdentifierName(
-                                Label(fallThrough.Destination)
+                                Label(destination)
                             )
                         );
 
-                        queue.Enqueue(new FlowPoint(fallThrough.Destination));
+                        queue.Enqueue(destination);
                     }
 
-                    m1: visited.Add(block);
+                    visited.Add(block);
                 }
             }
         }
