@@ -70,9 +70,9 @@ namespace Suspension.SourceGenerator.Generator
                         queue.Enqueue(conditional.Destination);
                     }
 
-                    if (block.FallThroughSuccessor is { } fallThrough)
+                    if (block.FallThroughSuccessor?.Destination is { } destination)
                     {
-                        queue.Enqueue(fallThrough.Destination);
+                        queue.Enqueue(destination);
                     }
                 }
 

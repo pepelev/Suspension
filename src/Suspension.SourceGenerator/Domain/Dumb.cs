@@ -380,6 +380,13 @@ namespace Suspension.SourceGenerator.Domain
                                 ArgumentList(),
                                 null
                             )
+                        ).WithLeadingTrivia(
+                            Trivia(
+                                LineDirectiveTrivia(
+                                    Token(SyntaxKind.DefaultKeyword),
+                                    true
+                                )
+                            )
                         );
                     }
 
@@ -402,6 +409,13 @@ namespace Suspension.SourceGenerator.Domain
                                     ),
                                     null
                                 )
+                            ).WithLeadingTrivia(
+                                Trivia(
+                                    LineDirectiveTrivia(
+                                        Token(SyntaxKind.DefaultKeyword),
+                                        true
+                                    )
+                                )
                             );
 
                             yield return LabeledStatement(
@@ -413,7 +427,15 @@ namespace Suspension.SourceGenerator.Domain
                         {
                             var statement = operation.Accept(new OperationToStatement(), scope);
                             scope = operation.Accept(new ScopeDeclaration(), scope);
-                            yield return statement;
+                            yield return statement.WithLeadingTrivia(
+                                Trivia(
+                                    LineDirectiveTrivia(
+                                        Literal(operation.Syntax.SyntaxTree.GetLineSpan(operation.Syntax.Span).StartLinePosition.Line + 1),
+                                        Literal(operation.Syntax.SyntaxTree.FilePath),
+                                        true
+                                    )
+                                )
+                            );
                         }
                     }
 
@@ -437,6 +459,14 @@ namespace Suspension.SourceGenerator.Domain
                                     Label(destination)
                                 )
                             )
+                        ).WithLeadingTrivia(
+                            Trivia(
+                                LineDirectiveTrivia(
+                                    Literal(block.BranchValue.Syntax.SyntaxTree.GetLineSpan(block.BranchValue.Syntax.Span).StartLinePosition.Line + 1),
+                                    Literal(block.BranchValue.Syntax.SyntaxTree.FilePath),
+                                    true
+                                )
+                            )
                         );
 
                         queue.Enqueue(destination);
@@ -444,15 +474,32 @@ namespace Suspension.SourceGenerator.Domain
 
                     if (block.FallThroughSuccessor is { } fallThrough)
                     {
-                        var destination = new FlowPoint(fallThrough.Destination);
-                        yield return GotoStatement(
-                            SyntaxKind.GotoStatement,
-                            IdentifierName(
-                                Label(destination)
-                            )
-                        );
+                        if (fallThrough.Semantics == ControlFlowBranchSemantics.Regular)
+                        {
+                            var destination = new FlowPoint(fallThrough.Destination);
+                            yield return GotoStatement(
+                                SyntaxKind.GotoStatement,
+                                IdentifierName(
+                                    Label(destination)
+                                )
+                            );
 
-                        queue.Enqueue(destination);
+                            queue.Enqueue(destination);
+                        }
+                        else if (fallThrough.Semantics == ControlFlowBranchSemantics.Throw)
+                        {
+                            yield return ThrowStatement(
+                                block.BranchValue.Accept(new OperationToExpression(), scope)
+                            ).WithLeadingTrivia(
+                                Trivia(
+                                    LineDirectiveTrivia(
+                                        Literal(block.BranchValue.Syntax.SyntaxTree.GetLineSpan(block.BranchValue.Syntax.Span).StartLinePosition.Line + 1),
+                                        Literal(block.BranchValue.Syntax.SyntaxTree.FilePath),
+                                        true
+                                    )
+                                )
+                            );
+                        }
                     }
 
                     visited.Add(block);

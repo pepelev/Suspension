@@ -102,5 +102,23 @@ namespace Suspension.SourceGenerator.Domain
                 _ => throw new InvalidOperationException()
             };
         }
+
+        public override ExpressionSyntax VisitObjectCreation(IObjectCreationOperation operation, Scope scope)
+        {
+            if (operation.Initializer != null)
+            {
+                throw operation.Initializer.NotImplemented();
+            }
+
+            return ObjectCreationExpression(
+                IdentifierName(operation.Type.Accept(new FullSymbolName())),
+                ArgumentList(
+                    SeparatedList(
+                        operation.Arguments.Select(argument => Argument(argument.Value.Accept(this, scope)))
+                    )
+                ),
+                null
+            );
+        }
     }
 }
