@@ -115,7 +115,7 @@ namespace Suspension.SourceGenerator.Domain
             List<TypeParameterConstraintClauseSyntax>(),
             List(
                 Fields.Concat(
-                    new MemberDeclarationSyntax[] {Constructor, Completed, Result, Run, Accept}
+                    new MemberDeclarationSyntax[] {Constructor, Completed, Run, Accept}
                 )
             )
         );
@@ -240,29 +240,6 @@ namespace Suspension.SourceGenerator.Domain
             null,
             ArrowExpressionClause(
                 LiteralExpression(SyntaxKind.FalseLiteralExpression)
-            ),
-            null,
-            Token(SyntaxKind.SemicolonToken)
-        );
-
-        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
-            List<AttributeListSyntax>(),
-            TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.OverrideKeyword)
-            ),
-            ParseTypeName("Suspension.None"),
-            null,
-            Identifier("Result"),
-            null,
-            ArrowExpressionClause(
-                ThrowExpression(
-                    ObjectCreationExpression(
-                        ParseTypeName("System.InvalidOperationException"),
-                        ArgumentList(),
-                        null
-                    )
-                )
             ),
             null,
             Token(SyntaxKind.SemicolonToken)

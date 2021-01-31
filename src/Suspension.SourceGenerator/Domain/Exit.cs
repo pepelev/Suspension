@@ -106,7 +106,7 @@ namespace Suspension.SourceGenerator.Domain
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                new MemberDeclarationSyntax[] {Completed, Result, Run, Accept}
+                new MemberDeclarationSyntax[] {Completed, Run, Accept}
             )
         );
 
@@ -122,27 +122,6 @@ namespace Suspension.SourceGenerator.Domain
             null,
             ArrowExpressionClause(
                 LiteralExpression(SyntaxKind.TrueLiteralExpression)
-            ),
-            null,
-            Token(SyntaxKind.SemicolonToken)
-        );
-
-        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
-            List<AttributeListSyntax>(),
-            TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.OverrideKeyword)
-            ),
-            ParseTypeName("Suspension.None"),
-            null,
-            Identifier("Result"),
-            null,
-            ArrowExpressionClause(
-                ObjectCreationExpression(
-                    ParseTypeName("Suspension.None"),
-                    ArgumentList(),
-                    null
-                )
             ),
             null,
             Token(SyntaxKind.SemicolonToken)

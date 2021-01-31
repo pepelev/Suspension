@@ -99,7 +99,7 @@ namespace Suspension.SourceGenerator.Generator
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                new MemberDeclarationSyntax[] { Completed, Result, ExplicitRun, Run, Visit, Visitor }
+                new MemberDeclarationSyntax[] { Completed, ExplicitRun, Run, Visit, Visitor }
             )
         );
 
@@ -112,35 +112,6 @@ namespace Suspension.SourceGenerator.Generator
             ParseTypeName("global::System.Boolean"),
             null,
             Identifier("Completed"),
-            AccessorList(
-                List(
-                    new[]
-                    {
-                        AccessorDeclaration(
-                            SyntaxKind.GetAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            TokenList(),
-                            Token(SyntaxKind.GetKeyword),
-                            null,
-                            null,
-                            Token(SyntaxKind.SemicolonToken)
-                        )
-                    }
-                )
-            ),
-            null,
-            null
-        );
-
-        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
-            List<AttributeListSyntax>(),
-            TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.AbstractKeyword)
-            ),
-            ParseTypeName("global::Suspension.None"),
-            null,
-            Identifier("Result"),
             AccessorList(
                 List(
                     new[]
