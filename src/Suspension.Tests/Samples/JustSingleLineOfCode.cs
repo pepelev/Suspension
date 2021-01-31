@@ -39,7 +39,7 @@ namespace Suspension.Tests.Samples
         }
 
         [Test]
-        public void Return_Completed_Coroutine()
+        public void Return_Completed_Coroutine_On_Run()
         {
             var entry = new Coroutines.Execute.Entry(action);
             var exit = entry.Run();

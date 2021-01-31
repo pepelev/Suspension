@@ -25,7 +25,7 @@ namespace Suspension.Tests
                 {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.11\\System.Runtime.dll"),
-                    MetadataReference.CreateFromFile(typeof(Coroutine<>).Assembly.Location)
+                    MetadataReference.CreateFromFile(typeof(Coroutine).Assembly.Location)
                 },
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
@@ -43,7 +43,7 @@ namespace Suspension.Tests
         public void Execution()
         {
             var random = new Random(142);
-            Coroutine<None> execute = new Execute.Entry(Console.WriteLine, () => random.Next(10) > 3);
+            Coroutine execute = new Execute.Entry(Console.WriteLine, () => random.Next(10) > 3);
             while (!execute.Completed)
             {
                 execute = execute.Run();

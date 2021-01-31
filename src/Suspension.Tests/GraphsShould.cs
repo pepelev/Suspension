@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using NUnit.Framework;
-using Suspension.SourceGenerator;
 using Suspension.SourceGenerator.Domain;
 using Suspension.SourceGenerator.Generator;
 using Suspension.SourceGenerator.Predicates;
@@ -57,7 +56,7 @@ namespace Suspension.Tests
                 {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.11\\System.Runtime.dll"),
-                    MetadataReference.CreateFromFile(typeof(Coroutine<>).Assembly.Location)
+                    MetadataReference.CreateFromFile(typeof(Coroutine).Assembly.Location)
                 },
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );

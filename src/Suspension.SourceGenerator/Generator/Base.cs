@@ -85,14 +85,7 @@ namespace Suspension.SourceGenerator.Generator
                     new[]
                     {
                         SimpleBaseType(
-                            GenericName(
-                                Identifier("Suspension.Coroutine"),
-                                TypeArgumentList(
-                                    SeparatedList(
-                                        new[] { ParseTypeName("Suspension.None") }
-                                    )
-                                )
-                            )
+                            IdentifierName("global::Suspension.Coroutine")
                         )
                     }
                 )
@@ -135,9 +128,9 @@ namespace Suspension.SourceGenerator.Generator
         private static MethodDeclarationSyntax ExplicitRun => MethodDeclaration(
             List<AttributeListSyntax>(),
             TokenList(),
-            ParseTypeName("global::Suspension.Coroutine<global::Suspension.None>"),
+            ParseTypeName("global::Suspension.Coroutine"),
             ExplicitInterfaceSpecifier(
-                IdentifierName("global::Suspension.Coroutine<global::Suspension.None>")
+                IdentifierName("global::Suspension.Coroutine")
             ),
             Identifier("Run"),
             null,
