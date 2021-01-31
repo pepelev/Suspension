@@ -9,12 +9,12 @@ using Suspension.Tests.Samples;
 namespace Suspension.Tests
 {
     [TestFixtureSource(typeof(Cases))]
-    public sealed class CoroutinesShould
+    public sealed class CoroutineShould
     {
         private readonly int count;
         private readonly Coroutine start;
 
-        public CoroutinesShould(Coroutine start, int count)
+        public CoroutineShould(Coroutine start, int count)
         {
             this.start = start;
             this.count = count;
