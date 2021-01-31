@@ -48,6 +48,26 @@ namespace Suspension.SourceGenerator.Domain
                     List<MemberDeclarationSyntax>(
                         new[] {OriginalClass}
                     )
+                ).WithLeadingTrivia(
+                    Trivia(
+                        PragmaWarningDirectiveTrivia(
+                            Token(SyntaxKind.DisableKeyword),
+                            SeparatedList<ExpressionSyntax>(
+                                new[]
+                                {
+                                    LiteralExpression(
+                                        SyntaxKind.NumericLiteralExpression,
+                                        Literal(Warnings.UnreachableCode)
+                                    ),
+                                    LiteralExpression(
+                                        SyntaxKind.NumericLiteralExpression,
+                                        Literal(Warnings.LabelNotReferenced)
+                                    )
+                                }
+                            ),
+                            true
+                        )
+                    )
                 );
             }
         }
