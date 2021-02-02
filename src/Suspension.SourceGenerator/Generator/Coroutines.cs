@@ -80,13 +80,16 @@ namespace Suspension.SourceGenerator.Generator
                     queue.Enqueue(conditional.Destination);
                 }
 
-                if (block.FallThroughSuccessor is { } fallThrough)
+                if (block.FallThroughSuccessor?.Destination is { } destination)
                 {
-                    queue.Enqueue(fallThrough.Destination);
+                    queue.Enqueue(destination);
                 }
             }
 
-            yield return new Exit(symbol);
+            if (references.ContainsKey("Exit"))
+            {
+                yield return new Exit(symbol);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

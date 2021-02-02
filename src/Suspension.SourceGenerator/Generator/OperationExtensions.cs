@@ -13,7 +13,7 @@ namespace Suspension.SourceGenerator.Generator
             operation.Accept(visitor, new None());
 
         public static Exception NotImplemented(this IOperation operation) => new NotImplementedException(
-            $"Operation {operation.GetType().Name} with syntax {operation.Syntax} not supported yet"
+            $"Operation {operation.GetType().Name} with syntax {operation.Syntax} not supported yet {Environment.StackTrace.Replace("\r\n", " ")}"
         );
     }
 }

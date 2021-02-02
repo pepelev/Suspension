@@ -1,9 +1,8 @@
 ﻿namespace Suspension
 {
-    public interface Coroutine<out T>
+    public interface Coroutine
     {
         bool Completed { get; }
-        T Result { get; }
-        Coroutine<T> Run();
+        Coroutine Run();
     }
 }

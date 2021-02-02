@@ -85,21 +85,14 @@ namespace Suspension.SourceGenerator.Generator
                     new[]
                     {
                         SimpleBaseType(
-                            GenericName(
-                                Identifier("Suspension.Coroutine"),
-                                TypeArgumentList(
-                                    SeparatedList(
-                                        new[] { ParseTypeName("Suspension.None") }
-                                    )
-                                )
-                            )
+                            IdentifierName("global::Suspension.Coroutine")
                         )
                     }
                 )
             ),
             List<TypeParameterConstraintClauseSyntax>(),
             List(
-                new MemberDeclarationSyntax[] { Completed, Result, ExplicitRun, Run, Visit, Visitor }
+                new MemberDeclarationSyntax[] { Completed, ExplicitRun, Run, Visit, Visitor }
             )
         );
 
@@ -132,41 +125,12 @@ namespace Suspension.SourceGenerator.Generator
             null
         );
 
-        private static PropertyDeclarationSyntax Result => PropertyDeclaration(
-            List<AttributeListSyntax>(),
-            TokenList(
-                Token(SyntaxKind.PublicKeyword),
-                Token(SyntaxKind.AbstractKeyword)
-            ),
-            ParseTypeName("global::Suspension.None"),
-            null,
-            Identifier("Result"),
-            AccessorList(
-                List(
-                    new[]
-                    {
-                        AccessorDeclaration(
-                            SyntaxKind.GetAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            TokenList(),
-                            Token(SyntaxKind.GetKeyword),
-                            null,
-                            null,
-                            Token(SyntaxKind.SemicolonToken)
-                        )
-                    }
-                )
-            ),
-            null,
-            null
-        );
-
         private static MethodDeclarationSyntax ExplicitRun => MethodDeclaration(
             List<AttributeListSyntax>(),
             TokenList(),
-            ParseTypeName("global::Suspension.Coroutine<global::Suspension.None>"),
+            ParseTypeName("global::Suspension.Coroutine"),
             ExplicitInterfaceSpecifier(
-                IdentifierName("global::Suspension.Coroutine<global::Suspension.None>")
+                IdentifierName("global::Suspension.Coroutine")
             ),
             Identifier("Run"),
             null,

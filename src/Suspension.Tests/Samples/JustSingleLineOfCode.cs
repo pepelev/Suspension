@@ -30,16 +30,6 @@ namespace Suspension.Tests.Samples
         }
 
         [Test]
-        public void Throw_Exception_On_Result()
-        {
-            var entry = new Coroutines.Execute.Entry(action);
-
-            Assert.Throws<InvalidOperationException>(
-                () => _ = entry.Result
-            );
-        }
-
-        [Test]
         public void Call_Action_On_Run()
         {
             var entry = new Coroutines.Execute.Entry(action);
@@ -49,23 +39,12 @@ namespace Suspension.Tests.Samples
         }
 
         [Test]
-        public void Return_Completed_Coroutine()
+        public void Return_Completed_Coroutine_On_Run()
         {
             var entry = new Coroutines.Execute.Entry(action);
             var exit = entry.Run();
 
             exit.Completed.Should().BeTrue();
-        }
-
-        [Test]
-        public void Give_Result_When_Completed()
-        {
-            var entry = new Coroutines.Execute.Entry(action);
-            var exit = entry.Run();
-
-            Assert.DoesNotThrow(
-                () => _ = exit.Result
-            );
         }
     }
 }

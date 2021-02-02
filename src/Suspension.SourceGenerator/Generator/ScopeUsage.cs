@@ -61,5 +61,36 @@ namespace Suspension.SourceGenerator.Generator
 
         public override Scope VisitIncrementOrDecrement(IIncrementOrDecrementOperation operation, Scope currentScope) =>
             operation.Target.Accept(this, currentScope);
+
+        public override Scope VisitObjectCreation(IObjectCreationOperation operation, Scope currentScope)
+        {
+            var scope = currentScope;
+            foreach (var argument in operation.Arguments)
+            {
+                scope = argument.Accept(this, scope);
+            }
+
+            return scope;
+        }
+
+        public override Scope VisitConversion(IConversionOperation operation, Scope currentScope) =>
+            operation.Operand.Accept(this, currentScope);
+
+        public override Scope VisitDiscardOperation(IDiscardOperation operation, Scope currentScope) => currentScope;
+
+        public override Scope VisitDeclarationExpression(IDeclarationExpressionOperation operation, Scope currentScope)
+            => currentScope;
+
+        public override Scope VisitFieldReference(IFieldReferenceOperation operation, Scope currentScope)
+        {
+            // todo support fields
+            return currentScope;
+        }
+
+        public override Scope VisitPropertyReference(IPropertyReferenceOperation operation, Scope currentScope)
+        {
+            // todo support fields
+            return currentScope;
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace Suspension.SourceGenerator.Generator
 
         public IEnumerator<(string Suspension, Scope Scope)> GetEnumerator()
         {
-            var names = new Graph(graph).SelectMany(pair => new[] { pair.From, pair.To }).Distinct().ToList();
+            var names = new Graph(graph).SelectMany(pair => new[] { pair.From, pair.To }).Append("Entry").Distinct().ToList();
             foreach (var name in names)
             {
                 var startPoint = Find(name);
@@ -55,9 +55,9 @@ namespace Suspension.SourceGenerator.Generator
                         queue.Enqueue(new FlowPoint(conditional.Destination));
                     }
 
-                    if (block.FallThroughSuccessor is { } fallThrough)
+                    if (block.FallThroughSuccessor?.Destination is { } destination)
                     {
-                        queue.Enqueue(new FlowPoint(fallThrough.Destination));
+                        queue.Enqueue(new FlowPoint(destination));
                     }
                 }
 
