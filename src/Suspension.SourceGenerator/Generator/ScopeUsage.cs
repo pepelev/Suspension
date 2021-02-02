@@ -72,5 +72,13 @@ namespace Suspension.SourceGenerator.Generator
 
             return scope;
         }
+
+        public override Scope VisitConversion(IConversionOperation operation, Scope currentScope) =>
+            operation.Operand.Accept(this, currentScope);
+
+        public override Scope VisitDiscardOperation(IDiscardOperation operation, Scope currentScope) => currentScope;
+
+        public override Scope VisitDeclarationExpression(IDeclarationExpressionOperation operation, Scope currentScope)
+            => currentScope;
     }
 }

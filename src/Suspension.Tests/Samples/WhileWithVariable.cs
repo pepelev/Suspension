@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Suspension.Tests.Samples
 {
     public partial class WhileWithVariable
     {
-        [Suspendable]
+        //[Suspendable] todo uncomment
         public static void Execute(Func<bool> argument, Action<string> action)
         {
             while (argument())
@@ -15,7 +16,7 @@ namespace Suspension.Tests.Samples
                 while (argument())
                 {
                     d += 2;
-                    action("visited check");
+                    action("visited check " + d.ToString(CultureInfo.InvariantCulture));
                 }
             }
 

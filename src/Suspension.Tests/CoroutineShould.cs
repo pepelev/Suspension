@@ -89,7 +89,57 @@ namespace Suspension.Tests
                     new SimpleIf.Coroutines.Execute.Entry(_ => { }, () => false),
                     3
                 );
+
+                var cases = new[]
+                {
+                    Call,
+                    New,
+                    DiscardAssignment,
+                    Parameters
+                }.SelectMany(x => x);
+
+                foreach (var (coroutine, count) in cases)
+                {
+                    yield return new TestFixtureData(coroutine, count);
+                }
             }
+
+            private static IEnumerable<(Coroutine Coroutine, int count)> Call =>
+                new (Coroutine Coroutine, int count)[]
+                {
+                    (new Call.Coroutines.StaticMethod.Entry(), 2),
+                    (new Call.Coroutines.InstanceMethod.Entry("42"), 2),
+                    (new Call.Coroutines.Delegate.Entry(() => { }), 2),
+                    (new Call.Coroutines.DelegateWithParameter.Entry(_ => { }), 2),
+                    (new Call.Coroutines.InvokeDelegate.Entry(() => { }), 2),
+                    (new Call.Coroutines.InvokeDelegateWithParameter.Entry(_ => { }), 2),
+                    (new Call.Coroutines.PrivateStaticMethod.Entry(), 2)
+                };
+
+            private static IEnumerable<(Coroutine Coroutine, int count)> New =>
+                new (Coroutine Coroutine, int count)[]
+                {
+                    (new New.Coroutines.String.Entry(), 2),
+                    (new New.Coroutines.Object.Entry(), 2),
+                    (new New.Coroutines.NullableInt.Entry(), 2),
+                    (new New.Coroutines.Int.Entry(), 2)
+                };
+
+            private static IEnumerable<(Coroutine Coroutine, int count)> DiscardAssignment =>
+                new (Coroutine Coroutine, int count)[]
+                {
+                    (new DiscardAssignment.Coroutines.Variable.Entry(), 2),
+                    (new DiscardAssignment.Coroutines.OutParameter.Entry(), 2)
+                };
+
+            private static IEnumerable<(Coroutine Coroutine, int count)> Parameters =>
+                new (Coroutine Coroutine, int count)[]
+                {
+                    (new Parameters.Coroutines.Regular.Entry("str"), 2),
+                    (new Parameters.Coroutines.Out.Entry(_ => { }), 3),
+                    (new Parameters.Coroutines.OutDiscard.Entry(), 2),
+                    (new Parameters.Coroutines.OutDeclaration.Entry(_ => { }), 3)
+                };
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }

@@ -425,8 +425,8 @@ namespace Suspension.SourceGenerator.Domain
                         }
                         else
                         {
-                            var statement = operation.Accept(new OperationToStatement(), scope);
                             scope = operation.Accept(new ScopeDeclaration(), scope);
+                            var statement = operation.Accept(new OperationToStatement(), scope);
                             yield return statement.WithLeadingTrivia(
                                 Trivia(
                                     LineDirectiveTrivia(
