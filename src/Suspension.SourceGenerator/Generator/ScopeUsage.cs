@@ -80,5 +80,17 @@ namespace Suspension.SourceGenerator.Generator
 
         public override Scope VisitDeclarationExpression(IDeclarationExpressionOperation operation, Scope currentScope)
             => currentScope;
+
+        public override Scope VisitFieldReference(IFieldReferenceOperation operation, Scope currentScope)
+        {
+            // todo support fields
+            return currentScope;
+        }
+
+        public override Scope VisitPropertyReference(IPropertyReferenceOperation operation, Scope currentScope)
+        {
+            // todo support fields
+            return currentScope;
+        }
     }
 }

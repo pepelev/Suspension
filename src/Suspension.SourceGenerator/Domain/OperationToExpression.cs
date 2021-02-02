@@ -166,6 +166,27 @@ namespace Suspension.SourceGenerator.Domain
             return scope.Find(value).Access;
         }
 
+        public override ExpressionSyntax VisitFieldReference(IFieldReferenceOperation operation, Scope scope) =>
+            MemberReference(operation, scope);
+
+        public override ExpressionSyntax VisitPropertyReference(IPropertyReferenceOperation operation, Scope scope) =>
+            MemberReference(operation, scope);
+
+        private ExpressionSyntax MemberReference(IMemberReferenceOperation operation, Scope scope)
+        {
+            var expression = operation.Instance switch
+            {
+                null => IdentifierName(operation.Member.ContainingType.Accept(new FullSymbolName())),
+                { } instance => instance.Accept(this, scope)
+            };
+
+            return MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                expression,
+                IdentifierName(operation.Member.Name)
+            );
+        }
+
         private sealed class LocalVisitor : OperationVisitor<None, ILocalSymbol>
         {
             public override ILocalSymbol DefaultVisit(IOperation operation, None argument) =>
