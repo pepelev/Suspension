@@ -70,10 +70,10 @@ namespace Suspension.SourceGenerator.Generator
         private FlowPoint Find(string suspensionPoint)
         {
             if (suspensionPoint == "Entry")
-                return new FlowPoint(graph.Entry(), 0);
+                return new FlowPoint(graph.Entry());
 
             if (suspensionPoint == "Exit")
-                return new FlowPoint(graph.Exit(), 0);
+                return new FlowPoint(graph.Exit());
 
             foreach (var block in graph.Blocks)
             {
