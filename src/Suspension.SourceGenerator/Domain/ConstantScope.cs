@@ -45,7 +45,7 @@ namespace Suspension.SourceGenerator.Domain
 
         public static Scope Empty { get; } = new ConstantScope(Array.Empty<Value>());
 
-        public override Scope Add(Value value)
+        public override Scope Union(Value value)
         {
             if (uniqueness.Contains(value))
             {

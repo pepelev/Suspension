@@ -11,7 +11,7 @@ namespace Suspension.SourceGenerator.Generator
             throw operation.NotImplemented();
 
         public override Scope VisitLocalReference(ILocalReferenceOperation operation, Scope currentScope)
-            => currentScope.Add(
+            => currentScope.Union(
                 new LocalValue(operation.Local)
             );
 
@@ -49,7 +49,7 @@ namespace Suspension.SourceGenerator.Generator
         }
 
         public override Scope VisitParameterReference(IParameterReferenceOperation operation, Scope currentScope) =>
-            currentScope.Add(
+            currentScope.Union(
                 new ParameterValue(operation.Parameter)
             );
 

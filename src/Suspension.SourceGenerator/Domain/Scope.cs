@@ -7,7 +7,7 @@ namespace Suspension.SourceGenerator.Domain
 {
     internal abstract class Scope : IEnumerable<Value>
     {
-        public abstract Scope Add(Value value);
+        public abstract Scope Union(Value value);
         public abstract IEnumerator<Value> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         public abstract Value Find(Value target);
