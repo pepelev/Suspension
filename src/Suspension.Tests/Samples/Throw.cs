@@ -1,4 +1,6 @@
 ﻿using System;
+using NUnit.Framework;
+
 //using FluentAssertions;
 //using NUnit.Framework;
 
@@ -6,7 +8,7 @@ namespace Suspension.Tests.Samples
 {
     public partial class Throw
     {
-        [Suspendable]
+        //[Suspendable]
         public static void SimpleThrow()
         {
             throw new Exception("Boom");
@@ -25,7 +27,53 @@ namespace Suspension.Tests.Samples
             Console.WriteLine(a);
         }
 
-        public static void TryCatch(int a)
+        public static void SuspensionPointInsideTryAndWhile(int a)
+        {
+            while (true)
+            {
+                try
+                {
+                    var b = 30;
+                    Console.WriteLine("Hello");
+                    Flow.Suspend("Inside");
+                    a += b;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    break;
+                }
+            }
+
+            Console.WriteLine(a);
+        }
+
+        public static void SuspensionPointInsideTryAndWhile2(int a)
+        {
+            while (true)
+            {
+                try
+                {
+                    var b = 30;
+                    Console.WriteLine("Hello");
+                    if (a < 17_358)
+                        Flow.Suspend("Inside");
+
+                    a += b;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    break;
+                }
+
+                Console.WriteLine("Outside");
+            }
+
+            Console.WriteLine(a);
+        }
+
+        public static void TryCatchException(int a)
         {
             try
             {
@@ -37,19 +85,42 @@ namespace Suspension.Tests.Samples
             }
         }
 
-        public static void TryCatchFinally(int a)
+        public static void TryCatch(int a)
         {
             try
             {
                 Console.WriteLine(a);
+                Flow.Suspend("Try");
+                Console.WriteLine(a + 1);
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
+                Console.WriteLine();
+                Flow.Suspend("Catch");
+                Console.WriteLine();
+            }
+        }
+
+        //[Test]
+        public static void TryCatchFinally()
+        {
+            try
+            {
+                Console.WriteLine("t-before");
+                Flow.Suspend("Try");
+                Console.WriteLine("t-after");
+            }
+            catch
+            {
+                Console.WriteLine("c-before");
+                Flow.Suspend("Catch");
+                Console.WriteLine("c-after");
             }
             finally
             {
-                Console.WriteLine("Finally");
+                Console.WriteLine("f-before");
+                Flow.Suspend("Finally");
+                Console.WriteLine("f-after");
             }
         }
 

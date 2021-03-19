@@ -57,6 +57,7 @@ namespace Suspension.Tests
         [TestCase(nameof(Throw.SimpleThrow))]
         [TestCase(nameof(Throw.ThrowFromIf))]
         [TestCase(nameof(Throw.TryCatch))]
+        [TestCase(nameof(Throw.TryCatchException))]
         [TestCase(nameof(Throw.TryCatchWhen))]
         [TestCase(nameof(Throw.TryTwoCatch))]
         [TestCase(nameof(Throw.TryTwoCatchWhen))]
