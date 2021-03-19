@@ -46,7 +46,7 @@ namespace Suspension.Tests
         public void Execution()
         {
             var random = new Random(142);
-            Coroutine execute = new Execute.Entry(Console.WriteLine, () => random.Next(10) > 3);
+            Coroutine execute = new Execute.Entry(() => random.Next(10) > 3, Console.WriteLine);
             while (!execute.Completed)
             {
                 execute = execute.Run();

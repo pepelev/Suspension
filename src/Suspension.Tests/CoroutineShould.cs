@@ -82,11 +82,11 @@ namespace Suspension.Tests
                     8
                 );
                 yield return new TestFixtureData(
-                    new SimpleIf.Coroutines.Execute.Entry(_ => { }, () => true),
+                    new SimpleIf.Coroutines.Execute.Entry(() => true, _ => { }),
                     4
                 );
                 yield return new TestFixtureData(
-                    new SimpleIf.Coroutines.Execute.Entry(_ => { }, () => false),
+                    new SimpleIf.Coroutines.Execute.Entry(() => false, _ => { }),
                     3
                 );
 

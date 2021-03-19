@@ -13,7 +13,7 @@ namespace Suspension.SourceGenerator.Domain
         public abstract Value Find(Value target);
 
         public Scope Union(IEnumerable<Value> values) => new ConstantScope(
-            this.Concat(values)
+            this.AsEnumerable().Union(values)
         );
 
         public Scope Except(IEnumerable<Value> values) => new ConstantScope(
