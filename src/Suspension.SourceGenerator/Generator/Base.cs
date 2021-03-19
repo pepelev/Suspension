@@ -229,7 +229,7 @@ namespace Suspension.SourceGenerator.Generator
                                         List<AttributeListSyntax>(),
                                         TokenList(),
                                         ParseTypeName(value.Type.Accept(new FullSymbolName())),
-                                        Identifier(value.Name),
+                                        Identifier(value.OriginalName),
                                         null
                                     )
                                 )

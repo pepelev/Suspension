@@ -12,9 +12,9 @@ using Suspension.SourceGenerator.Generator;
 using Suspension.SourceGenerator.Predicates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Suspension.SourceGenerator.Domain
+namespace Suspension.SourceGenerator.Domain.Second
 {
-    internal sealed class Dumb : Coroutine
+    internal sealed class Dumb2 : Coroutine
     {
         private readonly string name;
         private readonly IMethodSymbol method;
@@ -22,7 +22,7 @@ namespace Suspension.SourceGenerator.Domain
         private readonly Scope start;
         private readonly Graph3 graph;
 
-        public Dumb(string name, IMethodSymbol method, FlowPoint flowPoint, Scope start, Graph3 graph)
+        public Dumb2(string name, IMethodSymbol method, FlowPoint flowPoint, Scope start, Graph3 graph)
         {
             this.name = name;
             this.method = method;
@@ -46,7 +46,7 @@ namespace Suspension.SourceGenerator.Domain
                     List<ExternAliasDirectiveSyntax>(),
                     List<UsingDirectiveSyntax>(),
                     List<MemberDeclarationSyntax>(
-                        new[] {OriginalClass}
+                        new[] { OriginalClass }
                     )
                 ).WithLeadingTrivia(
                     Trivia(
@@ -82,7 +82,7 @@ namespace Suspension.SourceGenerator.Domain
             baseList: null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
-                new[] {CoroutinesClass}
+                new[] { CoroutinesClass }
             )
         );
 
@@ -96,7 +96,7 @@ namespace Suspension.SourceGenerator.Domain
             baseList: null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
-                new[] {MethodClass}
+                new[] { MethodClass }
             )
         );
 
@@ -110,7 +110,7 @@ namespace Suspension.SourceGenerator.Domain
             null,
             List<TypeParameterConstraintClauseSyntax>(),
             List<MemberDeclarationSyntax>(
-                new[] {CoroutineClass}
+                new[] { CoroutineClass }
             )
         );
 
@@ -135,7 +135,7 @@ namespace Suspension.SourceGenerator.Domain
             List<TypeParameterConstraintClauseSyntax>(),
             List(
                 Fields.Concat(
-                    new MemberDeclarationSyntax[] {Constructor, Completed, Run, Accept}
+                    new MemberDeclarationSyntax[] { Constructor, Completed, Run, Accept }
                 )
             )
         );

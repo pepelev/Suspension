@@ -57,7 +57,7 @@ namespace Suspension.SourceGenerator.Domain
         public override ExpressionSyntax VisitParameterReference(IParameterReferenceOperation operation, Scope scope)
         {
             var parameter = new ParameterValue(operation.Parameter);
-            return scope.Find(parameter).Access;
+            return scope.Find(parameter.Id).Access;
         }
 
         public override ExpressionSyntax VisitLocalReference(ILocalReferenceOperation operation, Scope scope)
@@ -65,7 +65,7 @@ namespace Suspension.SourceGenerator.Domain
             var local = new LocalValue(operation.Local);
             if (scope.Contains(local))
             {
-                return scope.Find(local).Access;
+                return scope.Find(local.Id).Access;
             }
 
             //return LocalDeclarationStatement(
@@ -163,7 +163,7 @@ namespace Suspension.SourceGenerator.Domain
         {
             var local = operation.Expression.Accept(new LocalVisitor());
             var value = new LocalValue(local);
-            return scope.Find(value).Access;
+            return scope.Find(value.Id).Access;
         }
 
         public override ExpressionSyntax VisitFieldReference(IFieldReferenceOperation operation, Scope scope) =>

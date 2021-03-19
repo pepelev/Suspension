@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
 using Suspension.SourceGenerator.Domain.Values;
 
 namespace Suspension.SourceGenerator.Domain
 {
     internal sealed class ConstantScope : Scope
     {
-        private readonly ImmutableHashSet<Value> uniqueness;
+        private readonly ImmutableDictionary<Value.Identity, Value> uniqueness;
         private readonly ImmutableSortedDictionary<int, Value> order;
 
-        private ConstantScope((ImmutableHashSet<Value> Uniqueness, ImmutableSortedDictionary<int, Value> Order) Pair)
+        private ConstantScope((ImmutableDictionary<Value.Identity, Value> Uniqueness, ImmutableSortedDictionary<int, Value> Order) Pair)
         {
             (uniqueness, order) = Pair;
         }
@@ -22,21 +20,18 @@ namespace Suspension.SourceGenerator.Domain
         {
         }
 
-        private static (ImmutableHashSet<Value> Uniqueness, ImmutableSortedDictionary<int, Value> Order) Build(IEnumerable<Value> values)
+        private static (ImmutableDictionary<Value.Identity, Value> Uniqueness, ImmutableSortedDictionary<int, Value> Order) Build(IEnumerable<Value> values)
         {
-            var uniquenessBuilder = ImmutableHashSet.CreateBuilder<Value>();
+            var uniquenessBuilder = ImmutableDictionary.CreateBuilder<Value.Identity, Value>();
             var orderBuilder = ImmutableSortedDictionary.CreateBuilder<int, Value>();
             foreach (var value in values)
             {
-                if (!uniquenessBuilder.Add(value))
+                if (uniquenessBuilder.ContainsKey(value.Id))
                 {
-                    if (!Debugger.IsAttached)
-                    {
-                        Debugger.Launch();
-                    }
                     throw new ArgumentException("Contains duplicates", nameof(values));
                 }
 
+                uniquenessBuilder.Add(value.Id, value);
                 orderBuilder.Add(orderBuilder.Count, value);
             }
 
@@ -47,20 +42,20 @@ namespace Suspension.SourceGenerator.Domain
 
         public override Scope Union(Value value)
         {
-            if (uniqueness.Contains(value))
+            if (uniqueness.ContainsKey(value.Id))
             {
                 return this;
             }
 
             return new ConstantScope(
                 (
-                    uniqueness.Add(value),
+                    uniqueness.Add(value.Id, value),
                     order.Add(order.Count, value)
                 )
             );
         }
 
         public override IEnumerator<Value> GetEnumerator() => order.Values.GetEnumerator();
-        public override Value Find(Value target) => uniqueness.Single(value => value.Equals(target));
+        public override Value Find(Value.Identity target) => uniqueness[target];
     }
 }
