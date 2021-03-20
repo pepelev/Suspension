@@ -8,7 +8,6 @@ namespace Suspension.Tests.Samples
 {
     public partial class Throw
     {
-        //[Suspendable]
         public static void SimpleThrow()
         {
             throw new Exception("Boom");
