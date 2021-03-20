@@ -43,7 +43,11 @@ namespace Suspension.Tests
         [TestCase("Samples/NestedTryCatch.cs", "action(\"start\");", "action(\"throw\");", ExpectedResult = true)]
         [TestCase("Samples/NestedTryCatch.cs", "action(\"inner try\");", "action(\"inner catch\");", ExpectedResult = true)]
         [TestCase("Samples/NestedTryCatch.cs", "action(\"inner try\");", "action(\"throw\");", ExpectedResult = true)]
-        public bool Test(string path, string entryCode, string targetCode)
+        [TestCase("Samples/NestedTryCatch.cs", "action(\"inner catch\");", "action(\"throw\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatchWithEmptyCatch.cs", "action(\"start\");", "action(\"inner try\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatchWithEmptyCatch.cs", "action(\"start\");", "action(\"throw\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatchWithEmptyCatch.cs", "action(\"inner try\");", "action(\"throw\");", ExpectedResult = true)]
+        public bool LookupReachablePoints(string path, string entryCode, string targetCode)
         {
             var graph = Graph(path);
 
@@ -52,15 +56,6 @@ namespace Suspension.Tests
             var reachability = new FlowReachability(entry, graph, new SuspensionPoint.Is());
 
             return reachability.Reachable(target);
-        }
-
-        [Test]
-        public void Test2()
-        {
-            var graph = Graph("Samples/SingleTryCatch.cs");
-            Console.WriteLine(
-                new PrettyGraph(graph)
-            );
         }
 
         private static FlowPoint Locate(ControlFlowGraph graph, string code)
