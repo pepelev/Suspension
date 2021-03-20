@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using FluentAssertions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -32,6 +31,18 @@ namespace Suspension.Tests
         [TestCase("Samples/TryFinally.cs", "action(\"start\");", "action(\"finally\");", ExpectedResult = true)]
         [TestCase("Samples/TryFinally.cs", "action(\"argument false\");", "action(\"finally\");", ExpectedResult = true)]
         [TestCase("Samples/TryFinally.cs", "action(\"Ok\");", "action(\"finally\");", ExpectedResult = true)]
+        [TestCase("Samples/TryFinally.cs", "action(\"finally\");", "action(\"Ok\");", ExpectedResult = false)]
+        [TestCase("Samples/TryFinally.cs", "action(\"finally\");", "action(\"argument false\");", ExpectedResult = false)]
+        [TestCase("Samples/NestedTryFinally.cs", "action(\"start\");", "action(\"inner try\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryFinally.cs", "action(\"inner try\");", "action(\"outer finally\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryFinally.cs", "action(\"inner finally\");", "action(\"outer finally\");", ExpectedResult = true)]
+        [TestCase("Samples/EmptyTryFinally.cs", "action(\"start\");", "action(\"finally\");", ExpectedResult = true)]
+        [TestCase("Samples/EmptyTryFinally.cs", "action(\"finally\");", "action(\"start\");", ExpectedResult = false)]
+        [TestCase("Samples/NestedTryCatch.cs", "action(\"start\");", "action(\"inner try\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatch.cs", "action(\"start\");", "action(\"inner catch\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatch.cs", "action(\"start\");", "action(\"throw\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatch.cs", "action(\"inner try\");", "action(\"inner catch\");", ExpectedResult = true)]
+        [TestCase("Samples/NestedTryCatch.cs", "action(\"inner try\");", "action(\"throw\");", ExpectedResult = true)]
         public bool Test(string path, string entryCode, string targetCode)
         {
             var graph = Graph(path);
@@ -75,7 +86,7 @@ namespace Suspension.Tests
             var tree = CSharpSyntaxTree.ParseText(code);
             var compilation = CSharpCompilation.Create(
                 "Suspension.Tests.Samples",
-                new[] { tree },
+                new[] {tree},
                 new[]
                 {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
