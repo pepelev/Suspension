@@ -23,12 +23,12 @@ namespace Suspension.SourceGenerator.Domain
 
         public override SyntaxTree Document => CSharpSyntaxTree.Create(
             Namespace.NormalizeWhitespace(),
-            path: $"{method.ContainingType.Accept(new NoGlobalFullSymbolName())}.Coroutines.{method.Name}.{Name}.cs",
+            path: $"{method.ContainingType.Accept(FullSymbolName.WithoutGlobal)}.Coroutines.{method.Name}.{Name}.cs",
             encoding: Encoding.UTF8
         );
 
         private NamespaceDeclarationSyntax Namespace => NamespaceDeclaration(
-            ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
+            ParseName(method.ContainingType.ContainingNamespace.Accept(FullSymbolName.WithGlobal)),
             List<ExternAliasDirectiveSyntax>(),
             List<UsingDirectiveSyntax>(),
             List<MemberDeclarationSyntax>(
@@ -92,7 +92,7 @@ namespace Suspension.SourceGenerator.Domain
                     {
                         SimpleBaseType(
                             ParseTypeName(
-                                $"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"
+                                $"{method.ContainingType.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}"
                             )
                         )
                     }
@@ -127,7 +127,7 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.PublicKeyword),
                 Token(SyntaxKind.OverrideKeyword)
             ),
-            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
+            ParseTypeName($"{method.ContainingType.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}"),
             null,
             Identifier("Run"),
             null,

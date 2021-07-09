@@ -27,7 +27,7 @@ namespace Suspension.SourceGenerator.Domain
             InvocationExpression(
                 operation.Instance switch
                 {
-                    null => ParseName(operation.TargetMethod.Accept(new FullSymbolName())),
+                    null => ParseName(operation.TargetMethod.Accept(FullSymbolName.WithGlobal)),
                     var instance => MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         instance.Accept(this, scope),
@@ -134,7 +134,7 @@ namespace Suspension.SourceGenerator.Domain
             }
 
             return ObjectCreationExpression(
-                IdentifierName(operation.Type.Accept(new FullSymbolName())),
+                IdentifierName(operation.Type.Accept(FullSymbolName.WithGlobal)),
                 ArgumentList(
                     SeparatedList(
                         operation.Arguments.Select(argument => VisitArgument(argument, scope))
@@ -151,7 +151,7 @@ namespace Suspension.SourceGenerator.Domain
             return conversion.IsImplicit
                 ? expression
                 : CastExpression(
-                    IdentifierName(operation.Type.Accept(new FullSymbolName())),
+                    IdentifierName(operation.Type.Accept(FullSymbolName.WithGlobal)),
                     expression
                 );
         }
@@ -176,7 +176,7 @@ namespace Suspension.SourceGenerator.Domain
         {
             var expression = operation.Instance switch
             {
-                null => IdentifierName(operation.Member.ContainingType.Accept(new FullSymbolName())),
+                null => IdentifierName(operation.Member.ContainingType.Accept(FullSymbolName.WithGlobal)),
                 { } instance => instance.Accept(this, scope)
             };
 

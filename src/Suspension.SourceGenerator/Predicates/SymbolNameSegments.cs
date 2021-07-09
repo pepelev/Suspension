@@ -20,7 +20,7 @@ namespace Suspension.SourceGenerator.Predicates
         {
             if (symbol.IsGenericType)
             {
-                var parameters = symbol.TypeArguments.Select(type => type.Accept(new FullSymbolName()));
+                var parameters = symbol.TypeArguments.Select(type => type.Accept(FullSymbolName.WithGlobal));
                 var name = $"{symbol.Name}<{string.Join(", ", parameters)}>";
                 return Prefix(symbol).Enqueue(name);
             }
