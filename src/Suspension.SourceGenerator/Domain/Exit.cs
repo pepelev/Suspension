@@ -27,20 +27,14 @@ namespace Suspension.SourceGenerator.Domain
             encoding: Encoding.UTF8
         );
 
-        private NamespaceDeclarationSyntax Namespace
-        {
-            get
-            {
-                return NamespaceDeclaration(
-                    ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
-                    List<ExternAliasDirectiveSyntax>(),
-                    List<UsingDirectiveSyntax>(),
-                    List<MemberDeclarationSyntax>(
-                        new[] { OriginalClass }
-                    )
-                );
-            }
-        }
+        private NamespaceDeclarationSyntax Namespace => NamespaceDeclaration(
+            ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
+            List<ExternAliasDirectiveSyntax>(),
+            List<UsingDirectiveSyntax>(),
+            List<MemberDeclarationSyntax>(
+                new[] { OriginalClass }
+            )
+        );
 
         private ClassDeclarationSyntax OriginalClass => ClassDeclaration(
             List<AttributeListSyntax>(),
@@ -84,8 +78,6 @@ namespace Suspension.SourceGenerator.Domain
             )
         );
 
-
-
         private ClassDeclarationSyntax CoroutineClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
@@ -99,7 +91,9 @@ namespace Suspension.SourceGenerator.Domain
                     new[]
                     {
                         SimpleBaseType(
-                            ParseTypeName(method.ContainingType.Accept(new FullSymbolName()) + ".Coroutines." + method.Name)
+                            ParseTypeName(
+                                $"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"
+                            )
                         )
                     }
                 )

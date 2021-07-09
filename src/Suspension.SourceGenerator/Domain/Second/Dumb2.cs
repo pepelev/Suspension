@@ -37,40 +37,34 @@ namespace Suspension.SourceGenerator.Domain.Second
             encoding: Encoding.UTF8
         );
 
-        private NamespaceDeclarationSyntax Namespace
-        {
-            get
-            {
-                return NamespaceDeclaration(
-                    ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
-                    List<ExternAliasDirectiveSyntax>(),
-                    List<UsingDirectiveSyntax>(),
-                    List<MemberDeclarationSyntax>(
-                        new[] { OriginalClass }
-                    )
-                ).WithLeadingTrivia(
-                    Trivia(
-                        PragmaWarningDirectiveTrivia(
-                            Token(SyntaxKind.DisableKeyword),
-                            SeparatedList<ExpressionSyntax>(
-                                new[]
-                                {
-                                    LiteralExpression(
-                                        SyntaxKind.NumericLiteralExpression,
-                                        Literal(Warnings.UnreachableCode)
-                                    ),
-                                    LiteralExpression(
-                                        SyntaxKind.NumericLiteralExpression,
-                                        Literal(Warnings.LabelNotReferenced)
-                                    )
-                                }
+        private NamespaceDeclarationSyntax Namespace => NamespaceDeclaration(
+            ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
+            List<ExternAliasDirectiveSyntax>(),
+            List<UsingDirectiveSyntax>(),
+            List<MemberDeclarationSyntax>(
+                new[] { OriginalClass }
+            )
+        ).WithLeadingTrivia(
+            Trivia(
+                PragmaWarningDirectiveTrivia(
+                    Token(SyntaxKind.DisableKeyword),
+                    SeparatedList<ExpressionSyntax>(
+                        new[]
+                        {
+                            LiteralExpression(
+                                SyntaxKind.NumericLiteralExpression,
+                                Literal(Warnings.UnreachableCode)
                             ),
-                            true
-                        )
-                    )
-                );
-            }
-        }
+                            LiteralExpression(
+                                SyntaxKind.NumericLiteralExpression,
+                                Literal(Warnings.LabelNotReferenced)
+                            )
+                        }
+                    ),
+                    true
+                )
+            )
+        );
 
         private ClassDeclarationSyntax OriginalClass => ClassDeclaration(
             List<AttributeListSyntax>(),
@@ -321,6 +315,8 @@ namespace Suspension.SourceGenerator.Domain.Second
                         )
                     );
                 }
+
+                // todo declare all local variables without name duplicates
 
                 scope = new ConstantScope(
                     scope.Select(value => new RedirectedToLocal(value, "Variable"))
