@@ -22,8 +22,7 @@ namespace Suspension.SourceGenerator.Generator
             var usages = new Graph2(graph, new ScopeUsage())
                 .ToDictionary(pair => pair.Suspension, pair => pair.Scope);
 
-            var declarations = new Graph2(graph, new ScopeDeclaration())
-                .ToDictionary(pair => pair.Suspension, pair => pair.Scope);
+            var declarations = new Graph4(graph).ToDictionary(pair => pair.Suspension, pair => pair.Declaration);
             var result = new Dictionary<string, Lazy<Scope>>();
             foreach (var pair in usages)
             {

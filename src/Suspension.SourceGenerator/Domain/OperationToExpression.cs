@@ -63,10 +63,7 @@ namespace Suspension.SourceGenerator.Domain
         public override ExpressionSyntax VisitLocalReference(ILocalReferenceOperation operation, Scope scope)
         {
             var local = new LocalValue(operation.Local);
-            if (scope.Contains(local))
-            {
-                return scope.Find(local.Id).Access;
-            }
+            return scope.Find(local.Id).Access;
 
             //return LocalDeclarationStatement(
             //    List<AttributeListSyntax>(),

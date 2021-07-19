@@ -14,6 +14,7 @@ namespace Suspension.SourceGenerator.Domain
         public abstract Scope Union(Value value);
         public abstract IEnumerator<Value> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public abstract bool Contains(Value.Identity target);
         public abstract Value Find(Value.Identity target);
 
         public Scope Union(IEnumerable<Value> values) => new ConstantScope(

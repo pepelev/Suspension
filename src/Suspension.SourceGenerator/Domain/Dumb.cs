@@ -337,21 +337,23 @@ namespace Suspension.SourceGenerator.Domain
                     if (visited.Contains(block))
                         continue;
 
-                    foreach (var local in block.EnclosingRegion.Locals.Select(local => new LocalValue(local)).Except(scope))
+                    var regionLocal = block.EnclosingRegion.Locals.Select(local => new LocalValue(local));
+                    var declaredLocals = regionLocal.Where(local => !scope.Contains(local.Id)).ToList();
+                    foreach (var declaredLocal in declaredLocals)
                     {
                         yield return LocalDeclarationStatement(
                             List<AttributeListSyntax>(),
                             TokenList(),
                             VariableDeclaration(
-                                IdentifierName(local.Type.Accept(FullSymbolName.WithGlobal)),
+                                IdentifierName(declaredLocal.Type.Accept(FullSymbolName.WithGlobal)),
                                 SeparatedList(
                                     new[]
                                     {
                                         VariableDeclarator(
-                                            Identifier(local.OriginalName),
+                                            Identifier(declaredLocal.OriginalName),
                                             null,
                                             EqualsValueClause(
-                                                DefaultExpression(ParseTypeName(local.Type.Accept(FullSymbolName.WithGlobal))) // todo may be there is elegant solution
+                                                DefaultExpression(ParseTypeName(declaredLocal.Type.Accept(FullSymbolName.WithGlobal))) // todo may be there is elegant solution
                                             )
                                         )
                                     }
@@ -359,6 +361,8 @@ namespace Suspension.SourceGenerator.Domain
                             )
                         );
                     }
+
+                    scope = scope.Union(declaredLocals);
 
                     yield return GotoStatement(
                         SyntaxKind.GotoStatement,
@@ -425,7 +429,6 @@ namespace Suspension.SourceGenerator.Domain
                         }
                         else
                         {
-                            scope = operation.Accept(new ScopeDeclaration(), scope);
                             var statement = operation.Accept(new OperationToStatement(), scope);
                             yield return statement.WithLeadingTrivia(
                                 Trivia(

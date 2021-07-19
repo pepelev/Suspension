@@ -56,6 +56,7 @@ namespace Suspension.SourceGenerator.Domain
         }
 
         public override IEnumerator<Value> GetEnumerator() => order.Values.GetEnumerator();
+        public override bool Contains(Value.Identity target) => uniqueness.ContainsKey(target);
         public override Value Find(Value.Identity target) => uniqueness[target];
     }
 }

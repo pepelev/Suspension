@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 
 namespace Suspension.SourceGenerator.Generator
@@ -10,5 +11,18 @@ namespace Suspension.SourceGenerator.Generator
 
         private static BasicBlock Find(this ControlFlowGraph graph, BasicBlockKind kind) =>
             graph.Blocks.Single(block => block.Kind == kind);
+
+        public static IEnumerable<BasicBlock> Successors(this BasicBlock block)
+        {
+            if (block.ConditionalSuccessor?.Destination is { } conditional)
+            {
+                yield return conditional;
+            }
+
+            if (block.FallThroughSuccessor?.Destination is { } destination)
+            {
+                yield return destination;
+            }
+        }
     }
 }
