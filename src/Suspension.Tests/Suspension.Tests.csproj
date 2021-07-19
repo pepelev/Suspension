@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\bin\suspension.tests</OutputPath>
+    <OutputPath>..\..\bin\Suspension.Tests</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +29,7 @@
     <Compile Update="Samples\**\*.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="..\Suspension.Samples\**\*.cs" />
   </ItemGroup>
 
 </Project>

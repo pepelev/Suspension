@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using Suspension.Samples;
 using Suspension.Tests.Samples;
 
 namespace Suspension.Tests
@@ -135,7 +136,7 @@ namespace Suspension.Tests
             private static IEnumerable<(Coroutine Coroutine, int count)> Parameters =>
                 new (Coroutine Coroutine, int count)[]
                 {
-                    (new Parameters.Coroutines.Regular.Entry("str"), 2),
+                    (new Parameters.Coroutines.Regular.Entry("str", _ => { }), 2),
                     (new Parameters.Coroutines.Out.Entry(_ => { }), 3),
                     (new Parameters.Coroutines.OutDiscard.Entry(), 2),
                     (new Parameters.Coroutines.OutDeclaration.Entry(_ => { }), 3)

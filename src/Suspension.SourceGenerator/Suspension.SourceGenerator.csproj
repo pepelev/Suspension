@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <OutputPath>..\..\Bin\Suspension.SourceGenerator</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
