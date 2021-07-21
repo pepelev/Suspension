@@ -53,6 +53,9 @@ namespace Suspension.SourceGenerator.Generator
                 new ParameterValue(operation.Parameter)
             );
 
+        public override Scope VisitUnaryOperator(IUnaryOperation operation, Scope currentScope) =>
+            operation.Operand.Accept(this, currentScope);
+
         public override Scope VisitBinaryOperator(IBinaryOperation operation, Scope currentScope)
         {
             var result = operation.LeftOperand.Accept(this, currentScope);

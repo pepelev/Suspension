@@ -64,25 +64,6 @@ namespace Suspension.SourceGenerator.Domain
         {
             var local = new LocalValue(operation.Local);
             return scope.Find(local.Id).Access;
-
-            //return LocalDeclarationStatement(
-            //    List<AttributeListSyntax>(),
-            //    TokenList(),
-            //    VariableDeclaration(
-            //        IdentifierName(local.Type.Accept(new FullSymbolName())),
-            //        SeparatedList(
-            //            new[]
-            //            {
-            //                VariableDeclarator(
-            //                    Identifier(local.Name)
-            //                )
-            //            }
-            //        )
-            //    )
-            //);
-
-            // todo fix it
-            return local.Access;
         }
 
         public override ExpressionSyntax VisitLiteral(ILiteralOperation operation, Scope _) => LiteralExpression(
@@ -90,9 +71,14 @@ namespace Suspension.SourceGenerator.Domain
             operation.ConstantValue.Value switch
             {
                 int value => Literal(value),
+                uint value => Literal(value),
+                long value => Literal(value),
+                ulong value => Literal(value),
                 string value => Literal(value),
                 char value => Literal(value),
-                _ => throw new NotImplementedException()
+                float value => Literal(value),
+                double value => Literal(value),
+                _ => throw operation.NotImplemented()
             }
         );
 
@@ -102,6 +88,11 @@ namespace Suspension.SourceGenerator.Domain
                 operation.Target.Accept(this, scope),
                 operation.Value.Accept(this, scope)
             );
+
+        public override ExpressionSyntax VisitUnaryOperator(IUnaryOperation operation, Scope scope) => PrefixUnaryExpression(
+            operation.Syntax.Kind(),
+            operation.Operand.Accept(this, scope)
+        );
 
         public override ExpressionSyntax VisitBinaryOperator(IBinaryOperation operation, Scope scope) =>
             BinaryExpression(

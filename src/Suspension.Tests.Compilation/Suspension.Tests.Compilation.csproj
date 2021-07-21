@@ -2,14 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
-    <MSBuildWarningsAsErrors>CS8785</MSBuildWarningsAsErrors>
-    <MSBuildWarningsAsErrors>CS8032</MSBuildWarningsAsErrors>
-    <DefineConstants>Semantic</DefineConstants>
+
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\bin\Suspension.Tests</OutputPath>
+    <OutputPath>..\..\bin\Suspension.Tests.Compilation</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,10 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Samples\**\*.cs">
+    <None Include="..\Suspension.Samples\**\*.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="..\Suspension.Samples\**\*.cs" />
+    </None>
   </ItemGroup>
 
 </Project>
