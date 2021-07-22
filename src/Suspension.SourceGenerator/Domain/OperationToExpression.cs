@@ -136,19 +136,19 @@ namespace Suspension.SourceGenerator.Domain
 
         public override ExpressionSyntax VisitArrayCreation(IArrayCreationOperation operation, Scope scope)
         {
-            var type = ArrayType(
-                IdentifierName(operation.Type.Accept(FullSymbolName.WithGlobal)),
-                List(
-                    new[]
-                    {
-                        ArrayRankSpecifier(
-                            SeparatedList(
-                                operation.DimensionSizes.Select(size => size.Accept(this, scope))
-                            )
+            var elementType = operation.Type.Accept(new ArrayElementType());
+            var name = IdentifierName(elementType.Accept(FullSymbolName.WithGlobal));
+            var rank = List(
+                new[]
+                {
+                    ArrayRankSpecifier(
+                        SeparatedList(
+                            operation.DimensionSizes.Select(size => size.Accept(this, scope))
                         )
-                    }
-                )
+                    )
+                }
             );
+            var type = ArrayType(name, rank);
 
             if (operation.Initializer == null)
             {

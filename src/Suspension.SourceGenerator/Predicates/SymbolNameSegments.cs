@@ -18,7 +18,7 @@ namespace Suspension.SourceGenerator.Predicates
 
         public override ImmutableQueue<string> VisitArrayType(IArrayTypeSymbol symbol)
         {
-            var elementType = symbol.ElementType.Accept(FullSymbolName.WithGlobal);
+            var elementType = symbol.ElementType.Accept(FullSymbolName.WithoutGlobal);
             var tail = new string(',', symbol.Rank - 1);
             return ImmutableQueue.Create($"{elementType}[{tail}]");
         }
@@ -27,7 +27,7 @@ namespace Suspension.SourceGenerator.Predicates
         {
             if (symbol.IsGenericType)
             {
-                var parameters = symbol.TypeArguments.Select(type => type.Accept(FullSymbolName.WithGlobal));
+                var parameters = symbol.TypeArguments.Select(type => type.Accept(FullSymbolName.WithoutGlobal));
                 var name = $"{symbol.Name}<{string.Join(", ", parameters)}>";
                 return Prefix(symbol).Enqueue(name);
             }

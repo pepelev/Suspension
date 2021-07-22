@@ -38,12 +38,9 @@ namespace Suspension.Tests.Compilation
         }
 
         [Test]
-        [TestCase("ObjectCreation_Object")]
-        [TestCase("ObjectCreation_String")]
-        [TestCase("ObjectCreation_ListOfStrings")]
-        public void MethodCall(string preprocessingDirective)
+        public void MethodCall()
         {
-            AssertNoDiagnostics("Syntax.cs", "MethodCall", preprocessingDirective);
+            AssertNoDiagnostics("Syntax.cs", "MethodCall");
         }
 
         [Test]
