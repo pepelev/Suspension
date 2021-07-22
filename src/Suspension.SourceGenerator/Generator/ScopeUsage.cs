@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain;
 using Suspension.SourceGenerator.Domain.Values;
@@ -75,6 +76,25 @@ namespace Suspension.SourceGenerator.Generator
 
             return scope;
         }
+
+        public override Scope VisitArrayCreation(IArrayCreationOperation operation, Scope currentScope)
+        {
+            var newScope = operation.DimensionSizes.Aggregate(
+                currentScope,
+                (scope, size) => size.Accept(this, scope)
+            );
+            return operation.Initializer switch
+            {
+                { } initializer => initializer.Accept(this, newScope),
+                null => newScope
+            };
+        }
+
+        public override Scope VisitArrayInitializer(IArrayInitializerOperation operation, Scope currentScope) =>
+            operation.ElementValues.Aggregate(
+                currentScope,
+                (scope, element) => element.Accept(this, scope)
+            );
 
         public override Scope VisitConversion(IConversionOperation operation, Scope currentScope) =>
             operation.Operand.Accept(this, currentScope);

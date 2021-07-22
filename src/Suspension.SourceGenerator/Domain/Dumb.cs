@@ -350,7 +350,7 @@ namespace Suspension.SourceGenerator.Domain
                                     new[]
                                     {
                                         VariableDeclarator(
-                                            Identifier(declaredLocal.OriginalName),
+                                            Identifier($"@{declaredLocal.OriginalName}"),
                                             null,
                                             EqualsValueClause(
                                                 DefaultExpression(ParseTypeName(declaredLocal.Type.Accept(FullSymbolName.WithGlobal))) // todo may be there is elegant solution

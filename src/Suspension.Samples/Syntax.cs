@@ -4,43 +4,89 @@ namespace Suspension.Samples
 {
     public sealed partial class Syntax
     {
+        private static void MarkUsed(object a)
+        {
+        }
+
         [Suspendable]
         public static void IntPlus(int a, int b, Action<int> report)
         {
             report(-13 + a);
         }
 
+#if ObjectCreation
+        [Suspendable]
+        public static void ObjectCreation()
+        {
+#if ObjectCreation_Object
+            MarkUsed(new object());
+#endif
+#if ObjectCreation_String
+            MarkUsed(new string('c', 17));
+#endif
+#if ObjectCreation_ArrayOfStrings
+            MarkUsed(new string[17]);
+#endif
+#if ObjectCreation_ArrayOfStringsWithInitializer
+            MarkUsed(new[] {"Hello", "World"});
+#endif
+#if ObjectCreation_MultidimensionalArrayOfStrings
+            MarkUsed(new string[17, 3, 7]);
+#endif
+#if ObjectCreation_ListOfStrings
+            MarkUsed(new System.Collections.Generic.List<string>());
+#endif
+        }
+#endif
+
+#if KeywordVariableName
+        [Suspendable]
+        public static void KeywordVariableName()
+        {
+            var @int = 72;
+            MarkUsed(@int);
+        }
+#endif
+
 #if Literal
         [Suspendable]
-        public static void LongLiteral()
+        public static void Literals()
         {
 #if Literal_Int
-            var @int = -42;
+            MarkUsed(-42);
 #endif
 #if Literal_UInt
-            var @uint = 93U;
+            MarkUsed(93U);
 #endif
 #if Literal_Long
-            var @long = 10L;
+            MarkUsed(10L);
 #endif
 #if Literal_ULong
-            var @ulong = 10UL;
+            MarkUsed(10UL);
 #endif
 #if Literal_String
-            var @string = "hello";
+            MarkUsed("hello");
 #endif
 #if Literal_Char
-            var @char = 'a';
+            MarkUsed('a');
 #endif
 #if Literal_Float
-            var @float = 12.9f;
+            MarkUsed(12.9f);
 #endif
 #if Literal_Double
-            var @double = 12.9;
+            MarkUsed(12.9);
 #endif
 #if Literal_Decimal
-            var @double = 12.9m;
+            MarkUsed(12.9m);
 #endif
+        }
+#endif
+
+#if MethodCall
+        [Suspendable]
+        public static void MethodCall()
+        {
+            var staticMethod = string.Join("|", "a");
         }
 #endif
     }

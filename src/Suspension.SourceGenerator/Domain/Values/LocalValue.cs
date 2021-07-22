@@ -18,7 +18,7 @@ namespace Suspension.SourceGenerator.Domain.Values
         public override ITypeSymbol Type => local.Type;
         public override string OriginalName => local.Name;
         public override IEnumerable<string> OccupiedNames => new[] {OriginalName};
-        public override ExpressionSyntax Access => SyntaxFactory.IdentifierName(OriginalName);
+        public override ExpressionSyntax Access => SyntaxFactory.IdentifierName($"@{OriginalName}");
         public override string ToString() => $"local: {local.Name}";
 
         private new sealed class Identity : Value.Identity

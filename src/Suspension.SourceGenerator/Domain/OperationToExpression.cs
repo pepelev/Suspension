@@ -66,21 +66,23 @@ namespace Suspension.SourceGenerator.Domain
             return scope.Find(local.Id).Access;
         }
 
-        public override ExpressionSyntax VisitLiteral(ILiteralOperation operation, Scope _) => LiteralExpression(
-            operation.Syntax.Kind(),
-            operation.ConstantValue.Value switch
+        public override ExpressionSyntax VisitLiteral(ILiteralOperation operation, Scope _)
+        {
+            var (kind, token) = operation.ConstantValue.Value switch
             {
-                int value => Literal(value),
-                uint value => Literal(value),
-                long value => Literal(value),
-                ulong value => Literal(value),
-                string value => Literal(value),
-                char value => Literal(value),
-                float value => Literal(value),
-                double value => Literal(value),
+                int value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
+                uint value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
+                long value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
+                ulong value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
+                string value => (SyntaxKind.StringLiteralExpression, Literal(value)),
+                char value => (SyntaxKind.CharacterLiteralExpression, Literal(value)),
+                float value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
+                double value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
+                decimal value => (SyntaxKind.NumericLiteralExpression, Literal(value)),
                 _ => throw operation.NotImplemented()
-            }
-        );
+            };
+            return LiteralExpression(kind, token);
+        }
 
         public override ExpressionSyntax VisitCompoundAssignment(ICompoundAssignmentOperation operation, Scope scope) =>
             AssignmentExpression(
@@ -131,6 +133,46 @@ namespace Suspension.SourceGenerator.Domain
                 null
             );
         }
+
+        public override ExpressionSyntax VisitArrayCreation(IArrayCreationOperation operation, Scope scope)
+        {
+            var type = ArrayType(
+                IdentifierName(operation.Type.Accept(FullSymbolName.WithGlobal)),
+                List(
+                    new[]
+                    {
+                        ArrayRankSpecifier(
+                            SeparatedList(
+                                operation.DimensionSizes.Select(size => size.Accept(this, scope))
+                            )
+                        )
+                    }
+                )
+            );
+
+            if (operation.Initializer == null)
+            {
+                return ArrayCreationExpression(type);
+            }
+
+            return ArrayCreationExpression(
+                type,
+                Initializer(operation.Initializer, scope)
+            );
+        }
+
+        public override ExpressionSyntax VisitArrayInitializer(IArrayInitializerOperation operation, Scope scope) =>
+            Initializer(operation, scope);
+
+        private InitializerExpressionSyntax Initializer(
+            IArrayInitializerOperation operation,
+            Scope scope)
+            => InitializerExpression(
+                SyntaxKind.ArrayInitializerExpression,
+                SeparatedList(
+                    operation.ElementValues.Select(element => element.Accept(this, scope))
+                )
+            );
 
         public override ExpressionSyntax VisitConversion(IConversionOperation operation, Scope currentScope)
         {
