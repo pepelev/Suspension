@@ -45,6 +45,14 @@ namespace Suspension.Tests.Compilation
         [TestCase("MethodCall", "MethodCall_OutVarParameter")]
         [TestCase("MethodCall", "MethodCall_InParameter")]
         [TestCase("MethodCall", "MethodCall_NamedParameters")]
+        [TestCase("Declaration", "Declaration_Regular")]
+        [TestCase("Declaration", "Declaration_Initialization")]
+        [TestCase("Declaration", "Declaration_Var")]
+        [TestCase("Declaration", "Declaration_Multiple")]
+        [TestCase("Interpolation", "Interpolation_Regular")]
+        [TestCase("Interpolation", "Interpolation_Format")]
+        [TestCase("Interpolation", "Interpolation_Alignment")]
+        [TestCase("Interpolation", "Interpolation_Format_Alignment")]
         public void Be_Compiled_Without_Diagnostics(string name, params string[] otherDirectives)
         {
             AssertNoDiagnostics("Syntax.cs", name, otherDirectives);

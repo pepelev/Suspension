@@ -73,6 +73,85 @@ namespace Suspension.SourceGenerator.Domain
             };
         }
 
+        public override ExpressionSyntax VisitInterpolatedString(IInterpolatedStringOperation operation, Scope scope)
+        {
+            return InterpolatedStringExpression(
+                Token(SyntaxKind.InterpolatedStringStartToken),
+                List(
+                    operation.Parts.Select(
+                        part => part.Accept(new Interpolation(this), scope)
+                    )
+                )
+            );
+        }
+
+        private sealed class Interpolation : OperationVisitor<Scope, InterpolatedStringContentSyntax>
+        {
+            private readonly OperationVisitor<Scope, ExpressionSyntax> expression;
+
+            public Interpolation(OperationVisitor<Scope, ExpressionSyntax> expression)
+            {
+                this.expression = expression;
+            }
+
+            public override InterpolatedStringContentSyntax VisitInterpolatedStringText(
+                IInterpolatedStringTextOperation operation,
+                Scope scope)
+            {
+                var text = operation.Text.ConstantValue.ToString();
+                return InterpolatedStringText(
+                    Token(TriviaList(), SyntaxKind.InterpolatedStringTextToken, text, text, TriviaList())
+                );
+            }
+
+            public override InterpolatedStringContentSyntax VisitInterpolation(
+                IInterpolationOperation operation,
+                Scope scope)
+            {
+                return (operation.FormatString, operation.Alignment) switch
+                {
+                    (null, null) => Interpolation(Syntax(operation.Expression)),
+                    ({ } format, null) => Interpolation(
+                        Syntax(operation.Expression),
+                        formatClause: Format(format),
+                        alignmentClause: null
+                    ),
+                    (null, { } alignment) => Interpolation(
+                        Syntax(operation.Expression),
+                        formatClause: null,
+                        alignmentClause: Alignment(alignment)
+                    ),
+                    ({ } format, { } alignment) => Interpolation(
+                        Syntax(operation.Expression),
+                        formatClause: Format(format),
+                        alignmentClause: Alignment(alignment)
+                    )
+                };
+
+                ExpressionSyntax Syntax(IOperation subOperation) => subOperation.Accept(expression, scope);
+
+                InterpolationAlignmentClauseSyntax Alignment(IOperation alignment) => InterpolationAlignmentClause(
+                    Token(SyntaxKind.CommaToken),
+                    Syntax(alignment)
+                );
+
+                static InterpolationFormatClauseSyntax Format(IOperation format)
+                {
+                    var text = format.ConstantValue.ToString();
+                    return InterpolationFormatClause(
+                        Token(SyntaxKind.ColonToken),
+                        Token(
+                            TriviaList(),
+                            SyntaxKind.InterpolatedStringTextToken,
+                            text,
+                            text,
+                            TriviaList()
+                        )
+                    );
+                }
+            }
+        }
+
         public override ExpressionSyntax VisitParameterReference(IParameterReferenceOperation operation, Scope scope)
         {
             var parameter = new ParameterValue(operation.Parameter);
@@ -224,7 +303,7 @@ namespace Suspension.SourceGenerator.Domain
 
         public override ExpressionSyntax VisitDeclarationExpression(
             IDeclarationExpressionOperation operation,
-            Scope scope) => operation.Expression.Accept(new LocalVisitor2(this), scope);
+            Scope scope) => operation.Expression.Accept(new DeclarationVisitor(this), scope);
 
         public override ExpressionSyntax VisitFieldReference(IFieldReferenceOperation operation, Scope scope) =>
             MemberReference(operation, scope);
@@ -247,20 +326,11 @@ namespace Suspension.SourceGenerator.Domain
             );
         }
 
-        private sealed class LocalVisitor : OperationVisitor<None, ILocalSymbol>
-        {
-            public override ILocalSymbol DefaultVisit(IOperation operation, None argument) =>
-                throw operation.NotImplemented();
-
-            public override ILocalSymbol VisitLocalReference(ILocalReferenceOperation operation, None argument) =>
-                operation.Local;
-        }
-
-        private sealed class LocalVisitor2 : OperationVisitor<Scope, ExpressionSyntax>
+        private sealed class DeclarationVisitor : OperationVisitor<Scope, ExpressionSyntax>
         {
             private readonly OperationVisitor<Scope, ExpressionSyntax> expression;
 
-            public LocalVisitor2(OperationVisitor<Scope, ExpressionSyntax> expression)
+            public DeclarationVisitor(OperationVisitor<Scope, ExpressionSyntax> expression)
             {
                 this.expression = expression;
             }

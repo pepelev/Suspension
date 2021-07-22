@@ -45,6 +45,29 @@ namespace Suspension.SourceGenerator.Generator
             return scope;
         }
 
+        public override Scope VisitInterpolatedString(IInterpolatedStringOperation operation, Scope currentScope)
+        {
+            return operation.Parts.Aggregate(currentScope, (scope, part) => part.Accept(this, scope));
+        }
+
+        public override Scope VisitInterpolatedStringText(
+            IInterpolatedStringTextOperation operation,
+            Scope currentScope)
+            => currentScope;
+
+        public override Scope VisitInterpolation(IInterpolationOperation operation, Scope currentScope)
+        {
+            var operations = new[]
+            {
+                operation.Expression,
+                operation.Alignment,
+                operation.FormatString
+            };
+            return operations
+                .Where(item => item != null)
+                .Aggregate(currentScope, (scope, item) => item.Accept(this, scope));
+        }
+
         public override Scope VisitArgument(IArgumentOperation operation, Scope currentScope) =>
             operation.Value.Accept(this, currentScope);
 

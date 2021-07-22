@@ -154,6 +154,32 @@ namespace Suspension.Samples
         }
 #endif
 
+#if Declaration
+        [Suspendable]
+        public static void Declaration(int a)
+        {
+#if Declaration_Regular
+            int regular;
+            regular = a;
+#endif
+#if Declaration_Initialization
+            int regular = 10;
+            MarkUsed(regular);
+#endif
+#if Declaration_Var
+            var regular = 15;
+            MarkUsed(regular);
+#endif
+#if Declaration_Multiple
+            int first, second;
+            first = 1;
+            second = 2;
+            MarkUsed(first);
+            MarkUsed(second);
+#endif
+        }
+#endif
+
 #if Assignment
         [Suspendable]
         public static void Assignment(int a)
@@ -182,6 +208,25 @@ namespace Suspension.Samples
 #endif
 #if Assignment_DeconstructionDeclaration
             var (left, right) = (10, "cat");
+#endif
+        }
+#endif
+
+#if Interpolation
+        [Suspendable]
+        public static void Interpolation(int a)
+        {
+#if Interpolation_Regular
+            MarkUsed($"Hello {a} p");
+#endif
+#if Interpolation_Format
+            MarkUsed($"Hello {a:2} p");
+#endif
+#if Interpolation_Alignment
+            MarkUsed($"Hello {a,7} p");
+#endif
+#if Interpolation_Format_Alignment
+            MarkUsed($"Hello {a,7:2} p");
 #endif
         }
 #endif
