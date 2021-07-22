@@ -8,6 +8,23 @@ namespace Suspension.Samples
         {
         }
 
+        private static void RefParameter(ref object a)
+        {
+        }
+
+        private static void OutParameter(out object a)
+        {
+            a = "";
+        }
+
+        private static void InParameter(in object a)
+        {
+        }
+
+        private static void NamedParameters(string a, int b)
+        {
+        }
+
         [Suspendable]
         public static void IntPlus(int a, int b, Action<int> report)
         {
@@ -50,7 +67,7 @@ namespace Suspension.Samples
 
 #if Literal
         [Suspendable]
-        public static void Literals()
+        public static void Literal()
         {
 #if Literal_Int
             MarkUsed(-42);
@@ -86,7 +103,86 @@ namespace Suspension.Samples
         [Suspendable]
         public static void MethodCall()
         {
-            var staticMethod = string.Join("|", "a");
+#if MethodCall_StaticMethod
+            var staticMethod = string.Join("|", "a"); 
+#endif
+#if MethodCall_InstanceMethod
+            MarkUsed("1234567890".Substring(1)); 
+#endif
+#if MethodCall_RefParameter
+            object refParameter = 40;
+            RefParameter(ref refParameter);
+#endif
+#if MethodCall_OutParameter
+            object outParameter;
+            OutParameter(out outParameter);
+#endif
+#if MethodCall_OutVarParameter
+            OutParameter(out var outParameter);
+#endif
+#if MethodCall_InParameter
+            object inParameter = 40;
+            InParameter(in inParameter);
+#endif
+#if MethodCall_NamedParameters
+            NamedParameters(b: 42, a: "hello");
+#endif
+        }
+#endif
+
+#if ParameterReference
+        [Suspendable]
+        public static void ParameterReference(int a)
+        {
+            MarkUsed(a);
+        }
+#endif
+
+#if ArrayElementReference
+        [Suspendable]
+        public static void ArrayElementReference(int[] a, int[][] b, int[,] c)
+        {
+#if ArrayElementReference_Regular
+            MarkUsed(a[5]);
+#endif
+#if ArrayElementReference_ArrayOfArrays
+            MarkUsed(b[5][6]);
+#endif
+#if ArrayElementReference_TwoDimensionalArray
+            MarkUsed(c[5, 6]);
+#endif
+        }
+#endif
+
+#if Assignment
+        [Suspendable]
+        public static void Assignment(int a)
+        {
+#if Assignment_Regular
+            int regular;
+            regular = a;
+#endif
+#if Assignment_Compound
+            int first;
+            int second;
+            first = second = a;
+#endif
+#if Assignment_Discard
+            _ = a;
+#endif
+
+            //todo deny ref locals
+#if Assignment_Ref
+            ref var refVariable = ref a;
+#endif
+#if Assignment_Deconstruction
+            int left;
+            string right;
+            (left, right) = (10, "cat");
+#endif
+#if Assignment_DeconstructionDeclaration
+            var (left, right) = (10, "cat");
+#endif
         }
 #endif
     }

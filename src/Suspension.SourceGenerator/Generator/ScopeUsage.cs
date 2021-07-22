@@ -11,13 +11,20 @@ namespace Suspension.SourceGenerator.Generator
         public override Scope DefaultVisit(IOperation operation, Scope currentScope) =>
             throw operation.NotImplemented();
 
-        public override Scope VisitLocalReference(ILocalReferenceOperation operation, Scope currentScope)
-            => currentScope.Union(
-                new LocalValue(operation.Local)
-            );
+        public override Scope VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope currentScope)
+        {
+            var newScope = operation.Target.Accept(this, currentScope);
+            return operation.Value.Accept(this, newScope);
+        }
 
-        public override Scope VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope currentScope) =>
-            operation.Value.Accept(this, currentScope);
+        public override Scope VisitDeconstructionAssignment(IDeconstructionAssignmentOperation operation, Scope currentScope)
+        {
+            var newScope = operation.Target.Accept(this, currentScope);
+            return operation.Value.Accept(this, newScope);
+        }
+
+        public override Scope VisitTuple(ITupleOperation operation, Scope currentScope) =>
+            operation.Elements.Aggregate(currentScope, (scope, element) => element.Accept(this, scope));
 
         public override Scope VisitExpressionStatement(IExpressionStatementOperation operation, Scope currentScope) =>
             operation.Operation.Accept(this, currentScope);
@@ -53,6 +60,17 @@ namespace Suspension.SourceGenerator.Generator
             currentScope.Union(
                 new ParameterValue(operation.Parameter)
             );
+
+        public override Scope VisitLocalReference(ILocalReferenceOperation operation, Scope currentScope)
+            => currentScope.Union(
+                new LocalValue(operation.Local)
+            );
+
+        public override Scope VisitArrayElementReference(IArrayElementReferenceOperation operation, Scope currentScope)
+        {
+            var newScope = operation.ArrayReference.Accept(this, currentScope);
+            return operation.Indices.Aggregate(newScope, (scope, index) => index.Accept(this, scope));
+        }
 
         public override Scope VisitUnaryOperator(IUnaryOperation operation, Scope currentScope) =>
             operation.Operand.Accept(this, currentScope);

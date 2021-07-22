@@ -13,7 +13,7 @@ namespace Suspension.SourceGenerator.Domain
 {
     internal sealed class OperationToExpression : OperationVisitor<Scope, ExpressionSyntax>
     {
-        public override ExpressionSyntax DefaultVisit(IOperation operation, Scope argument) =>
+        public override ExpressionSyntax DefaultVisit(IOperation operation, Scope scope) =>
             throw operation.NotImplemented();
 
         public override ExpressionSyntax VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope scope) =>
@@ -22,6 +22,23 @@ namespace Suspension.SourceGenerator.Domain
                 operation.Target.Accept(this, scope),
                 operation.Value.Accept(this, scope)
             );
+
+        public override ExpressionSyntax VisitDeconstructionAssignment(
+            IDeconstructionAssignmentOperation operation,
+            Scope scope) =>
+            AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                operation.Target.Accept(this, scope),
+                operation.Value.Accept(this, scope)
+            );
+
+        public override ExpressionSyntax VisitTuple(ITupleOperation operation, Scope scope) => TupleExpression(
+            SeparatedList(
+                operation.Elements.Select(
+                    element => Argument(element.Accept(this, scope))
+                )
+            )
+        );
 
         public override ExpressionSyntax VisitInvocation(IInvocationOperation operation, Scope scope) =>
             InvocationExpression(
@@ -48,8 +65,10 @@ namespace Suspension.SourceGenerator.Domain
             var expression = operation.Value.Accept(this, scope);
             return operation.Parameter.RefKind switch
             {
-                RefKind.None => Argument(expression),
-                RefKind.Out => Argument(null, Token(SyntaxKind.OutKeyword), expression),
+                RefKind.None => Argument(NameColon(operation.Parameter.Name), Token(SyntaxKind.None), expression),
+                RefKind.Out => Argument(NameColon(operation.Parameter.Name), Token(SyntaxKind.OutKeyword), expression),
+                RefKind.Ref => Argument(NameColon(operation.Parameter.Name), Token(SyntaxKind.RefKeyword), expression),
+                RefKind.In => Argument(NameColon(operation.Parameter.Name), Token(SyntaxKind.InKeyword), expression),
                 _ => throw operation.NotImplemented()
             };
         }
@@ -65,6 +84,20 @@ namespace Suspension.SourceGenerator.Domain
             var local = new LocalValue(operation.Local);
             return scope.Find(local.Id).Access;
         }
+
+        public override ExpressionSyntax VisitArrayElementReference(
+            IArrayElementReferenceOperation operation,
+            Scope scope)
+            => ElementAccessExpression(
+                operation.ArrayReference.Accept(this, scope),
+                BracketedArgumentList(
+                    SeparatedList(
+                        operation.Indices.Select(
+                            index => Argument(index.Accept(this, scope))
+                        )
+                    )
+                )
+            );
 
         public override ExpressionSyntax VisitLiteral(ILiteralOperation operation, Scope _)
         {
@@ -189,12 +222,9 @@ namespace Suspension.SourceGenerator.Domain
         public override ExpressionSyntax VisitDiscardOperation(IDiscardOperation operation, Scope scope) =>
             IdentifierName("_");
 
-        public override ExpressionSyntax VisitDeclarationExpression(IDeclarationExpressionOperation operation, Scope scope)
-        {
-            var local = operation.Expression.Accept(new LocalVisitor());
-            var value = new LocalValue(local);
-            return scope.Find(value.Id).Access;
-        }
+        public override ExpressionSyntax VisitDeclarationExpression(
+            IDeclarationExpressionOperation operation,
+            Scope scope) => operation.Expression.Accept(new LocalVisitor2(this), scope);
 
         public override ExpressionSyntax VisitFieldReference(IFieldReferenceOperation operation, Scope scope) =>
             MemberReference(operation, scope);
@@ -224,6 +254,33 @@ namespace Suspension.SourceGenerator.Domain
 
             public override ILocalSymbol VisitLocalReference(ILocalReferenceOperation operation, None argument) =>
                 operation.Local;
+        }
+
+        private sealed class LocalVisitor2 : OperationVisitor<Scope, ExpressionSyntax>
+        {
+            private readonly OperationVisitor<Scope, ExpressionSyntax> expression;
+
+            public LocalVisitor2(OperationVisitor<Scope, ExpressionSyntax> expression)
+            {
+                this.expression = expression;
+            }
+
+            public override ExpressionSyntax DefaultVisit(IOperation operation, Scope scope) =>
+                throw operation.NotImplemented();
+
+            public override ExpressionSyntax VisitLocalReference(ILocalReferenceOperation operation, Scope scope)
+            {
+                var value = new LocalValue(operation.Local);
+                return scope.Find(value.Id).Access;
+            }
+
+            public override ExpressionSyntax VisitTuple(ITupleOperation operation, Scope argument) => TupleExpression(
+                SeparatedList(
+                    operation.Elements.Select(
+                        element => Argument(element.Accept(expression, argument))
+                    )
+                )
+            );
         }
     }
 }

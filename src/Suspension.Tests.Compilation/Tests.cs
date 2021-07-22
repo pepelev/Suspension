@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.CodeAnalysis;
@@ -11,51 +12,51 @@ namespace Suspension.Tests.Compilation
     public sealed class Tests
     {
         [Test]
-        [TestCase("Literal_Int")]
-        [TestCase("Literal_UInt")]
-        [TestCase("Literal_Long")]
-        [TestCase("Literal_ULong")]
-        [TestCase("Literal_String")]
-        [TestCase("Literal_Char")]
-        [TestCase("Literal_Float")]
-        [TestCase("Literal_Double")]
-        [TestCase("Literal_Decimal")]
-        public void Literal(string preprocessingDirective)
+        [TestCase("Literal", "Literal_Int")]
+        [TestCase("Literal", "Literal_UInt")]
+        [TestCase("Literal", "Literal_Long")]
+        [TestCase("Literal", "Literal_ULong")]
+        [TestCase("Literal", "Literal_String")]
+        [TestCase("Literal", "Literal_Char")]
+        [TestCase("Literal", "Literal_Float")]
+        [TestCase("Literal", "Literal_Double")]
+        [TestCase("Literal", "Literal_Decimal")]
+        [TestCase("ParameterReference")]
+        [TestCase("ObjectCreation", "ObjectCreation_Object")]
+        [TestCase("ObjectCreation", "ObjectCreation_String")]
+        [TestCase("ObjectCreation", "ObjectCreation_ArrayOfStrings")]
+        [TestCase("ObjectCreation", "ObjectCreation_ArrayOfStringsWithInitializer")]
+        [TestCase("ObjectCreation", "ObjectCreation_MultidimensionalArrayOfStrings")]
+        [TestCase("ObjectCreation", "ObjectCreation_ListOfStrings")]
+        [TestCase("KeywordVariableName")]
+        [TestCase("ArrayElementReference", "ArrayElementReference_Regular")]
+        [TestCase("ArrayElementReference", "ArrayElementReference_ArrayOfArrays")]
+        [TestCase("ArrayElementReference", "ArrayElementReference_TwoDimensionalArray")]
+        [TestCase("Assignment", "Assignment_Regular")]
+        [TestCase("Assignment", "Assignment_Compound")]
+        [TestCase("Assignment", "Assignment_Discard")]
+        [TestCase("Assignment", "Assignment_Ref")]
+        [TestCase("Assignment", "Assignment_Deconstruction")]
+        [TestCase("Assignment", "Assignment_DeconstructionDeclaration")]
+        [TestCase("MethodCall", "MethodCall_StaticMethod")]
+        [TestCase("MethodCall", "MethodCall_InstanceMethod")]
+        [TestCase("MethodCall", "MethodCall_RefParameter")]
+        [TestCase("MethodCall", "MethodCall_OutParameter")]
+        [TestCase("MethodCall", "MethodCall_OutVarParameter")]
+        [TestCase("MethodCall", "MethodCall_InParameter")]
+        [TestCase("MethodCall", "MethodCall_NamedParameters")]
+        public void Be_Compiled_Without_Diagnostics(string name, params string[] otherDirectives)
         {
-            AssertNoDiagnostics("Syntax.cs", "Literal", preprocessingDirective);
+            AssertNoDiagnostics("Syntax.cs", name, otherDirectives);
         }
 
-        [Test]
-        [TestCase("ObjectCreation_Object")]
-        [TestCase("ObjectCreation_String")]
-        [TestCase("ObjectCreation_ArrayOfStrings")]
-        [TestCase("ObjectCreation_ArrayOfStringsWithInitializer")]
-        [TestCase("ObjectCreation_MultidimensionalArrayOfStrings")]
-        [TestCase("ObjectCreation_ListOfStrings")]
-        public void ObjectCreation(string preprocessingDirective)
-        {
-            AssertNoDiagnostics("Syntax.cs", "ObjectCreation", preprocessingDirective);
-        }
-
-        [Test]
-        public void MethodCall()
-        {
-            AssertNoDiagnostics("Syntax.cs", "MethodCall");
-        }
-
-        [Test]
-        public void KeywordVariableName()
-        {
-            AssertNoDiagnostics("Syntax.cs", "KeywordVariableName");
-        }
-
-        private static void AssertNoDiagnostics(string fileName, params string[] preprocessingDirectives)
+        private static void AssertNoDiagnostics(string fileName, string methodName, params string[] preprocessingDirectives)
         {
             var code = File.ReadAllText(fileName, Encoding.UTF8);
             var tree = CSharpSyntaxTree.ParseText(
                 code,
                 CSharpParseOptions.Default
-                    .WithPreprocessorSymbols(preprocessingDirectives)
+                    .WithPreprocessorSymbols(preprocessingDirectives.Prepend(methodName))
             );
             var compilation = CSharpCompilation.Create(
                 "Suspension.Tests.Samples",
@@ -74,6 +75,7 @@ namespace Suspension.Tests.Compilation
             var emitResult = cmp.Emit(Stream.Null);
             emitResult.Diagnostics.Should().BeEmpty();
             diagnostics.Should().BeEmpty();
+            cmp.ContainsSymbolsWithName(methodName, SymbolFilter.Member).Should().BeTrue();
         }
     }
 }
