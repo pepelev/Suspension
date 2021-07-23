@@ -29,7 +29,7 @@ namespace Suspension.SourceGenerator.Generator
             return syntaxNodes
                 .OfType<MethodDeclarationSyntax>()
                 .That(
-                    new HasAttribute(semantic, new FullName("global::Suspension.SuspendableAttribute"))
+                    new HasAttribute(semantic, new FullName($"global::{typeof(SuspendableAttribute).FullName}"))
                 )
                 .SelectMany(method => MakeSuspendable(method, semantic))
                 .GetEnumerator();
