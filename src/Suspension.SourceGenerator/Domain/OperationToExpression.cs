@@ -326,6 +326,9 @@ namespace Suspension.SourceGenerator.Domain
             );
         }
 
+        public override ExpressionSyntax VisitExpressionStatement(IExpressionStatementOperation operation, Scope scope) =>
+            operation.Operation.Accept(this, scope);
+
         private sealed class DeclarationVisitor : OperationVisitor<Scope, ExpressionSyntax>
         {
             private readonly OperationVisitor<Scope, ExpressionSyntax> expression;
@@ -344,10 +347,10 @@ namespace Suspension.SourceGenerator.Domain
                 return scope.Find(value.Id).Access;
             }
 
-            public override ExpressionSyntax VisitTuple(ITupleOperation operation, Scope argument) => TupleExpression(
+            public override ExpressionSyntax VisitTuple(ITupleOperation operation, Scope scope) => TupleExpression(
                 SeparatedList(
                     operation.Elements.Select(
-                        element => Argument(element.Accept(expression, argument))
+                        element => Argument(element.Accept(expression, scope))
                     )
                 )
             );
