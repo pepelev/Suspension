@@ -14,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
 {
-    internal sealed class Dumb : Coroutine
+    internal sealed class Dumb : Output
     {
         private readonly string name;
         private readonly IMethodSymbol method;

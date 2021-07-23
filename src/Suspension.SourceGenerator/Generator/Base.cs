@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Generator
 {
-    internal sealed class Base : Coroutine
+    internal sealed class Base : Output
     {
         private readonly Graph3 graph;
         private readonly IMethodSymbol method;

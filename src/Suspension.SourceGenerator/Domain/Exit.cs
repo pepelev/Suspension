@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
 {
-    internal sealed class Exit : Coroutine
+    internal sealed class Exit : Output
     {
         private readonly IMethodSymbol method;
 

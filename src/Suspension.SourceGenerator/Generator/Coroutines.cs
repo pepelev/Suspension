@@ -11,7 +11,7 @@ using Suspension.SourceGenerator.Predicates;
 
 namespace Suspension.SourceGenerator.Generator
 {
-    internal sealed class Coroutines : IEnumerable<Coroutine>
+    internal sealed class Coroutines : IEnumerable<Output>
     {
         private readonly SyntaxTree document;
         private readonly Compilation compilation;
@@ -22,7 +22,7 @@ namespace Suspension.SourceGenerator.Generator
             this.compilation = compilation;
         }
 
-        public IEnumerator<Coroutine> GetEnumerator()
+        public IEnumerator<Output> GetEnumerator()
         {
             var semantic = compilation.GetSemanticModel(document);
             var syntaxNodes = document.GetRoot().DescendantNodes().ToList();
@@ -35,7 +35,7 @@ namespace Suspension.SourceGenerator.Generator
                 .GetEnumerator();
         }
 
-        private IEnumerable<Coroutine> MakeSuspendable(MethodDeclarationSyntax method, SemanticModel semantic)
+        private IEnumerable<Output> MakeSuspendable(MethodDeclarationSyntax method, SemanticModel semantic)
         {
             var symbol = semantic.GetDeclaredSymbol(method) ?? throw new Exception("GetDeclaredSymbol failed");
             var graph = ControlFlowGraph.Create(method, semantic);
@@ -44,7 +44,7 @@ namespace Suspension.SourceGenerator.Generator
             var graph3 = new Graph3(graph);
             var references = graph3.ToDictionary(pair => pair.Suspension, pair => pair.References);
 
-            Coroutine Dumb(string name, FlowPoint point)
+            Output Dumb(string name, FlowPoint point)
             {
                 return new Dumb(name, symbol, point, references[name], graph3);
             }
