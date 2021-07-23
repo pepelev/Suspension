@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Suspension.SourceGenerator.Generator;
@@ -18,12 +19,23 @@ namespace Suspension.SourceGenerator
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var compilation = context.Compilation;
-            var coroutines = compilation.SyntaxTrees.SelectMany(tree => new Coroutines(tree, compilation));
-            foreach (var coroutine in coroutines)
+            try
             {
-                var tree = coroutine.Document;
-                context.AddSource(tree.FilePath.Replace(":", "."), tree.GetText());
+                var compilation = context.Compilation;
+                var coroutines = compilation.SyntaxTrees.SelectMany(tree => new Coroutines(tree, compilation));
+                foreach (var coroutine in coroutines)
+                {
+                    var tree = coroutine.Document;
+                    context.AddSource(tree.FilePath.Replace(":", "."), tree.GetText());
+                }
+            }
+            catch (NotImplementedException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message + "\n" + e.StackTrace);
             }
         }
     }

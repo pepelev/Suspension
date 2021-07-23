@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Generator
 {
-    internal sealed class Base : Coroutine
+    internal sealed class Base : Output
     {
         private readonly Graph3 graph;
         private readonly IMethodSymbol method;
@@ -22,24 +22,18 @@ namespace Suspension.SourceGenerator.Generator
 
         public override SyntaxTree Document => CSharpSyntaxTree.Create(
             Namespace.NormalizeWhitespace(),
-            path: $"{method.ContainingType.Accept(new NoGlobalFullSymbolName())}.Coroutines.{method.Name}.cs",
+            path: $"{method.ContainingType.Accept(FullSymbolName.WithoutGlobal)}.Coroutines.{method.Name}.cs",
             encoding: Encoding.UTF8
         );
 
-        private NamespaceDeclarationSyntax Namespace
-        {
-            get
-            {
-                return NamespaceDeclaration(
-                    ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
-                    List<ExternAliasDirectiveSyntax>(),
-                    List<UsingDirectiveSyntax>(),
-                    List<MemberDeclarationSyntax>(
-                        new[] { OriginalClass }
-                    )
-                );
-            }
-        }
+        private NamespaceDeclarationSyntax Namespace => NamespaceDeclaration(
+            ParseName(method.ContainingType.ContainingNamespace.Accept(FullSymbolName.WithGlobal)),
+            List<ExternAliasDirectiveSyntax>(),
+            List<UsingDirectiveSyntax>(),
+            List<MemberDeclarationSyntax>(
+                new[] { OriginalClass }
+            )
+        );
 
         private ClassDeclarationSyntax OriginalClass => ClassDeclaration(
             List<AttributeListSyntax>(),
@@ -151,7 +145,7 @@ namespace Suspension.SourceGenerator.Generator
                 Token(SyntaxKind.PublicKeyword),
                 Token(SyntaxKind.AbstractKeyword)
             ),
-            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
+            ParseTypeName($"{method.ContainingType.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}"),
             null,
             Identifier("Run"),
             null,
@@ -228,8 +222,8 @@ namespace Suspension.SourceGenerator.Generator
                                     value => Parameter(
                                         List<AttributeListSyntax>(),
                                         TokenList(),
-                                        ParseTypeName(value.Type.Accept(new FullSymbolName())),
-                                        Identifier(value.Name),
+                                        ParseTypeName(value.Type.Accept(FullSymbolName.WithGlobal)),
+                                        Identifier(value.OriginalName),
                                         null
                                     )
                                 )

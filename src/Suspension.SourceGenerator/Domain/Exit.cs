@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
 {
-    internal sealed class Exit : Coroutine
+    internal sealed class Exit : Output
     {
         private readonly IMethodSymbol method;
 
@@ -23,24 +23,18 @@ namespace Suspension.SourceGenerator.Domain
 
         public override SyntaxTree Document => CSharpSyntaxTree.Create(
             Namespace.NormalizeWhitespace(),
-            path: $"{method.ContainingType.Accept(new NoGlobalFullSymbolName())}.Coroutines.{method.Name}.{Name}.cs",
+            path: $"{method.ContainingType.Accept(FullSymbolName.WithoutGlobal)}.Coroutines.{method.Name}.{Name}.cs",
             encoding: Encoding.UTF8
         );
 
-        private NamespaceDeclarationSyntax Namespace
-        {
-            get
-            {
-                return NamespaceDeclaration(
-                    ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
-                    List<ExternAliasDirectiveSyntax>(),
-                    List<UsingDirectiveSyntax>(),
-                    List<MemberDeclarationSyntax>(
-                        new[] { OriginalClass }
-                    )
-                );
-            }
-        }
+        private NamespaceDeclarationSyntax Namespace => NamespaceDeclaration(
+            ParseName(method.ContainingType.ContainingNamespace.Accept(FullSymbolName.WithGlobal)),
+            List<ExternAliasDirectiveSyntax>(),
+            List<UsingDirectiveSyntax>(),
+            List<MemberDeclarationSyntax>(
+                new[] { OriginalClass }
+            )
+        );
 
         private ClassDeclarationSyntax OriginalClass => ClassDeclaration(
             List<AttributeListSyntax>(),
@@ -84,8 +78,6 @@ namespace Suspension.SourceGenerator.Domain
             )
         );
 
-
-
         private ClassDeclarationSyntax CoroutineClass => ClassDeclaration(
             List<AttributeListSyntax>(),
             TokenList(
@@ -99,7 +91,9 @@ namespace Suspension.SourceGenerator.Domain
                     new[]
                     {
                         SimpleBaseType(
-                            ParseTypeName(method.ContainingType.Accept(new FullSymbolName()) + ".Coroutines." + method.Name)
+                            ParseTypeName(
+                                $"{method.ContainingType.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}"
+                            )
                         )
                     }
                 )
@@ -133,7 +127,7 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.PublicKeyword),
                 Token(SyntaxKind.OverrideKeyword)
             ),
-            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
+            ParseTypeName($"{method.ContainingType.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}"),
             null,
             Identifier("Run"),
             null,

@@ -14,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Suspension.SourceGenerator.Domain
 {
-    internal sealed class Dumb : Coroutine
+    internal sealed class Dumb : Output
     {
         private readonly string name;
         private readonly IMethodSymbol method;
@@ -33,7 +33,7 @@ namespace Suspension.SourceGenerator.Domain
 
         public override SyntaxTree Document => CSharpSyntaxTree.Create(
             Namespace.NormalizeWhitespace(),
-            path: $"{method.ContainingType.Accept(new NoGlobalFullSymbolName())}.Coroutines.{method.Name}.{name}.cs",
+            path: $"{method.ContainingType.Accept(FullSymbolName.WithoutGlobal)}.Coroutines.{method.Name}.{name}.cs",
             encoding: Encoding.UTF8
         );
 
@@ -42,7 +42,7 @@ namespace Suspension.SourceGenerator.Domain
             get
             {
                 return NamespaceDeclaration(
-                    ParseName(method.ContainingType.ContainingNamespace.Accept(new FullSymbolName())),
+                    ParseName(method.ContainingType.ContainingNamespace.Accept(FullSymbolName.WithGlobal)),
                     List<ExternAliasDirectiveSyntax>(),
                     List<UsingDirectiveSyntax>(),
                     List<MemberDeclarationSyntax>(
@@ -127,7 +127,7 @@ namespace Suspension.SourceGenerator.Domain
                     new[]
                     {
                         SimpleBaseType(
-                            ParseTypeName(method.ContainingType.Accept(new FullSymbolName()) + ".Coroutines." + method.Name)
+                            ParseTypeName(method.ContainingType.Accept(FullSymbolName.WithGlobal) + ".Coroutines." + method.Name)
                         )
                     }
                 )
@@ -198,11 +198,11 @@ namespace Suspension.SourceGenerator.Domain
                     Token(SyntaxKind.ReadOnlyKeyword)
                 ),
                 VariableDeclaration(
-                    ParseTypeName(value.Type.Accept(new FullSymbolName())),
+                    ParseTypeName(value.Type.Accept(FullSymbolName.WithGlobal)),
                     SeparatedList(
                         new[]
                         {
-                            VariableDeclarator(value.Name)
+                            VariableDeclarator(value.OriginalName)
                         }
                     )
                 )
@@ -221,8 +221,8 @@ namespace Suspension.SourceGenerator.Domain
                         value => Parameter(
                             List<AttributeListSyntax>(),
                             TokenList(),
-                            ParseTypeName(value.Type.Accept(new FullSymbolName())),
-                            Identifier(value.Name),
+                            ParseTypeName(value.Type.Accept(FullSymbolName.WithGlobal)),
+                            Identifier(value.OriginalName),
                             null
                         )
                     )
@@ -238,9 +238,9 @@ namespace Suspension.SourceGenerator.Domain
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     ThisExpression(),
-                                    IdentifierName(value.Name)
+                                    IdentifierName(value.OriginalName)
                                 ),
-                                IdentifierName(value.Name)
+                                IdentifierName(value.OriginalName)
                             )
                         )
                     )
@@ -271,7 +271,7 @@ namespace Suspension.SourceGenerator.Domain
                 Token(SyntaxKind.PublicKeyword),
                 Token(SyntaxKind.OverrideKeyword)
             ),
-            ParseTypeName($"{method.ContainingType.Accept(new FullSymbolName())}.Coroutines.{method.Name}"),
+            ParseTypeName($"{method.ContainingType.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}"),
             null,
             Identifier("Run"),
             null,
@@ -305,12 +305,12 @@ namespace Suspension.SourceGenerator.Domain
                         List<AttributeListSyntax>(),
                         TokenList(),
                         VariableDeclaration(
-                            IdentifierName(value.Type.Accept(new FullSymbolName())),
+                            IdentifierName(value.Type.Accept(FullSymbolName.WithGlobal)),
                             SeparatedList(
                                 new[]
                                 {
                                     VariableDeclarator(
-                                        Identifier($"{value.Name}Variable"),
+                                        Identifier($"{value.OriginalName}Variable"),
                                         null,
                                         EqualsValueClause(
                                             value.Access
@@ -337,21 +337,23 @@ namespace Suspension.SourceGenerator.Domain
                     if (visited.Contains(block))
                         continue;
 
-                    foreach (var local in block.EnclosingRegion.Locals.Select(local => new LocalValue(local)).Except(scope))
+                    var regionLocal = block.EnclosingRegion.Locals.Select(local => new LocalValue(local));
+                    var declaredLocals = regionLocal.Where(local => !scope.Contains(local.Id)).ToList();
+                    foreach (var declaredLocal in declaredLocals)
                     {
                         yield return LocalDeclarationStatement(
                             List<AttributeListSyntax>(),
                             TokenList(),
                             VariableDeclaration(
-                                IdentifierName(local.Type.Accept(new FullSymbolName())),
+                                IdentifierName(declaredLocal.Type.Accept(FullSymbolName.WithGlobal)),
                                 SeparatedList(
                                     new[]
                                     {
                                         VariableDeclarator(
-                                            Identifier(local.Name),
+                                            Identifier($"@{declaredLocal.OriginalName}"),
                                             null,
                                             EqualsValueClause(
-                                                DefaultExpression(ParseTypeName(local.Type.Accept(new FullSymbolName()))) // todo may be there is elegant solution
+                                                DefaultExpression(ParseTypeName(declaredLocal.Type.Accept(FullSymbolName.WithGlobal))) // todo may be there is elegant solution
                                             )
                                         )
                                     }
@@ -359,6 +361,8 @@ namespace Suspension.SourceGenerator.Domain
                             )
                         );
                     }
+
+                    scope = scope.Union(declaredLocals);
 
                     yield return GotoStatement(
                         SyntaxKind.GotoStatement,
@@ -373,7 +377,7 @@ namespace Suspension.SourceGenerator.Domain
 
                     if (block.Kind == BasicBlockKind.Exit)
                     {
-                        var className = $"{method.ContainingSymbol.Accept(new FullSymbolName())}.Coroutines.{method.Name}.Exit";
+                        var className = $"{method.ContainingSymbol.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}.Exit";
                         yield return ReturnStatement(
                             ObjectCreationExpression(
                                 ParseTypeName(className),
@@ -397,14 +401,14 @@ namespace Suspension.SourceGenerator.Domain
                         {
                             var suspensionPointName = operation.Accept(new SuspensionPoint.Name());
                             var targetScope = graph.Single(pair => pair.Suspension == suspensionPointName).References;
-                            var className = $"{method.ContainingSymbol.Accept(new FullSymbolName())}.Coroutines.{method.Name}.{suspensionPointName}";
+                            var className = $"{method.ContainingSymbol.Accept(FullSymbolName.WithGlobal)}.Coroutines.{method.Name}.{suspensionPointName}";
                             var currentScope = scope;
                             yield return ReturnStatement(
                                 ObjectCreationExpression(
                                     ParseTypeName(className),
                                     ArgumentList(
                                         SeparatedList(
-                                            targetScope.Select(value => Argument(currentScope.Find(value).Access))
+                                            targetScope.Select(value => Argument(currentScope.Find(value.Id).Access))
                                         )
                                     ),
                                     null
@@ -425,7 +429,6 @@ namespace Suspension.SourceGenerator.Domain
                         }
                         else
                         {
-                            scope = operation.Accept(new ScopeDeclaration(), scope);
                             var statement = operation.Accept(new OperationToStatement(), scope);
                             yield return statement.WithLeadingTrivia(
                                 Trivia(

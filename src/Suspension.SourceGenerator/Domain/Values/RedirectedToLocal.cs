@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -15,18 +17,12 @@ namespace Suspension.SourceGenerator.Domain.Values
             this.suffix = suffix;
         }
 
+        public override Identity Id => redirectedFrom.Id;
         public override ITypeSymbol Type => redirectedFrom.Type;
-        public override string Name => redirectedFrom.Name;
+        public override string OriginalName => redirectedFrom.OriginalName;
+        public override IEnumerable<string> OccupiedNames => redirectedFrom.OccupiedNames.Append(NewName);
         public override ExpressionSyntax Access => SyntaxFactory.IdentifierName(NewName);
-        private string NewName => $"{Name}{suffix}";
-
-        private bool Equals(Value other) =>
-            other.Equals(redirectedFrom);
-
-        public override bool Equals(object obj) =>
-            ReferenceEquals(this, obj) || obj is Value other && Equals(other);
-
-        public override int GetHashCode() => redirectedFrom.GetHashCode();
+        private string NewName => $"{OriginalName}{suffix}";
         public override string ToString() => $"{redirectedFrom} -> {NewName}";
     }
 }

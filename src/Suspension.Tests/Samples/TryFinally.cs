@@ -2,11 +2,12 @@
 
 namespace Suspension.Tests.Samples
 {
-    public class TryFinally
+    public partial class TryFinally
     {
-        //[Suspendable]
+        [Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)
         {
+            action("start");
             try
             {
                 if (argument())

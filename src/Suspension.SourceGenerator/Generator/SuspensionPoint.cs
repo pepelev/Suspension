@@ -45,5 +45,41 @@ namespace Suspension.SourceGenerator.Generator
                 };
             }
         }
+
+        public sealed class Named : OperationVisitor<None, bool>
+        {
+            private readonly string expectedName;
+
+            public Named(string expectedName)
+            {
+                this.expectedName = expectedName;
+            }
+
+            public override bool DefaultVisit(IOperation operation, None _) => false;
+
+            public override bool VisitExpressionStatement(IExpressionStatementOperation operation, None _) =>
+                operation.Operation.Accept(this);
+
+            public override bool VisitInvocation(IInvocationOperation operation, None _)
+            {
+                var predicate = new FullName("global::Suspension.Flow.Suspend");
+                if (!predicate.Match(operation.TargetMethod))
+                {
+                    return false;
+                }
+
+                var argument = operation.Arguments switch
+                {
+                    { Length: 1 } arguments => arguments[0],
+                    _ => throw new InvalidOperationException($"{operation} must have single argument")
+                };
+                return argument.Value.ConstantValue switch
+                {
+                    { HasValue: true, Value: string name } => name == expectedName,
+                    _ => throw new InvalidOperationException($"Suspension point {operation} must have name as compile time constant")
+                };
+
+            }
+        }
     }
 }

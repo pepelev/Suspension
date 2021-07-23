@@ -16,11 +16,18 @@ namespace Suspension.SourceGenerator.Predicates
 
         private ImmutableQueue<string> Prefix(ISymbol symbol) => symbol.ContainingSymbol.Accept(this);
 
+        public override ImmutableQueue<string> VisitArrayType(IArrayTypeSymbol symbol)
+        {
+            var elementType = symbol.ElementType.Accept(FullSymbolName.WithoutGlobal);
+            var tail = new string(',', symbol.Rank - 1);
+            return ImmutableQueue.Create($"{elementType}[{tail}]");
+        }
+
         public override ImmutableQueue<string> VisitNamedType(INamedTypeSymbol symbol)
         {
             if (symbol.IsGenericType)
             {
-                var parameters = symbol.TypeArguments.Select(type => type.Accept(new FullSymbolName()));
+                var parameters = symbol.TypeArguments.Select(type => type.Accept(FullSymbolName.WithoutGlobal));
                 var name = $"{symbol.Name}<{string.Join(", ", parameters)}>";
                 return Prefix(symbol).Enqueue(name);
             }

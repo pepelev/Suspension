@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Suspension.SourceGenerator.Generator
 {
@@ -15,10 +16,14 @@ namespace Suspension.SourceGenerator.Generator
             var first = enumerator.Current;
             while (enumerator.MoveNext())
             {
-                yield return (first, enumerator.Current);
+                var second = enumerator.Current;
+                yield return (first, second);
 
-                first = enumerator.Current;
+                first = second;
             }
         }
+
+        public static IEnumerable<T> Without<T>(this IEnumerable<T> source, ICollection<T> subtrahend) =>
+            source.Where(item => !subtrahend.Contains(item));
     }
 }

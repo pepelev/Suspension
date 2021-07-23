@@ -7,17 +7,23 @@ namespace Suspension.SourceGenerator.Domain
 {
     internal abstract class Scope : IEnumerable<Value>
     {
-        public abstract Scope Add(Value value);
+        private static readonly ProjectingEquality<Value, Value.Identity> equality = new(
+            value => value.Id,
+            EqualityComparer<Value.Identity>.Default
+        );
+        public abstract Scope Union(Value value);
         public abstract IEnumerator<Value> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public abstract Value Find(Value target);
+        public abstract bool Contains(Value.Identity target);
+        public abstract Value Find(Value.Identity target);
 
         public Scope Union(IEnumerable<Value> values) => new ConstantScope(
-            this.Concat(values)
+            this.AsEnumerable().Union(values, equality)
         );
 
+        // todo equality for values does not make sense
         public Scope Except(IEnumerable<Value> values) => new ConstantScope(
-            this.AsEnumerable().Except(values)
+            this.AsEnumerable().Except(values, equality)
         );
 
         public override string ToString()

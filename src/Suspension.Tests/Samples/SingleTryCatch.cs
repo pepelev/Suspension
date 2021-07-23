@@ -2,11 +2,12 @@
 
 namespace Suspension.Tests.Samples
 {
-    public class SingleTryCatch
+    public partial class SingleTryCatch
     {
-        //[Suspendable]
+        [Suspendable]
         public static void Execute(Func<bool> argument, Action<string> action)
         {
+            action("start");
             try
             {
                 if (argument())

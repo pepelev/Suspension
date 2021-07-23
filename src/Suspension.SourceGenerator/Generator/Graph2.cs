@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.FlowAnalysis;
@@ -21,10 +20,10 @@ namespace Suspension.SourceGenerator.Generator
 
         public IEnumerator<(string Suspension, Scope Scope)> GetEnumerator()
         {
-            var names = new Graph(graph).SelectMany(pair => new[] { pair.From, pair.To }).Append("Entry").Distinct().ToList();
-            foreach (var name in names)
+            // todo remove to list
+            var points = new GraphAllSuspensionPoints(graph).ToList();
+            foreach (var (name, startPoint) in points)
             {
-                var startPoint = Find(name);
                 var scope = ConstantScope.Empty;
                 var visited = new HashSet<FlowPoint>();
                 var queue = new Queue<FlowPoint>();
@@ -66,30 +65,5 @@ namespace Suspension.SourceGenerator.Generator
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        private FlowPoint Find(string suspensionPoint)
-        {
-            if (suspensionPoint == "Entry")
-                return new FlowPoint(graph.Entry(), 0);
-
-            if (suspensionPoint == "Exit")
-                return new FlowPoint(graph.Exit(), 0);
-
-            foreach (var block in graph.Blocks)
-            {
-                for (var i = 0; i < block.Operations.Length; i++)
-                {
-                    var operation = block.Operations[i];
-                    if (operation.Accept(new SuspensionPoint.Is()))
-                    {
-                        var name = operation.Accept(new SuspensionPoint.Name());
-                        if (name == suspensionPoint)
-                            return new FlowPoint(block, i + 1);
-                    }
-                }
-            }
-
-            throw new InvalidOperationException();
-        }
     }
 }

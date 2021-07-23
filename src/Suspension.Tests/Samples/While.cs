@@ -17,6 +17,7 @@ namespace Suspension.Tests.Samples
                 }
             }
 
+            action("before outside");
             Flow.Suspend("OutsideWhile");
             action("World");
         }

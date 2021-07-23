@@ -14,7 +14,7 @@ namespace Suspension.SourceGenerator.Predicates
 
         public override bool Match(ISymbol argument)
         {
-            var actualName = argument.Accept(new FullSymbolName());
+            var actualName = argument.Accept(FullSymbolName.WithGlobal);
             return StringComparer.Ordinal.Equals(actualName, expectedName);
         }
     }

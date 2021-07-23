@@ -2,7 +2,7 @@
 
 namespace Suspension.SourceGenerator.Domain
 {
-    internal abstract class Coroutine
+    internal abstract class Output
     {
         public abstract SyntaxTree Document { get; }
     }

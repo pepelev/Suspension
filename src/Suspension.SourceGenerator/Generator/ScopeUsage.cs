@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 using Suspension.SourceGenerator.Domain;
 using Suspension.SourceGenerator.Domain.Values;
@@ -10,13 +11,20 @@ namespace Suspension.SourceGenerator.Generator
         public override Scope DefaultVisit(IOperation operation, Scope currentScope) =>
             throw operation.NotImplemented();
 
-        public override Scope VisitLocalReference(ILocalReferenceOperation operation, Scope currentScope)
-            => currentScope.Add(
-                new LocalValue(operation.Local)
-            );
+        public override Scope VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope currentScope)
+        {
+            var newScope = operation.Target.Accept(this, currentScope);
+            return operation.Value.Accept(this, newScope);
+        }
 
-        public override Scope VisitSimpleAssignment(ISimpleAssignmentOperation operation, Scope currentScope) =>
-            operation.Value.Accept(this, currentScope);
+        public override Scope VisitDeconstructionAssignment(IDeconstructionAssignmentOperation operation, Scope currentScope)
+        {
+            var newScope = operation.Target.Accept(this, currentScope);
+            return operation.Value.Accept(this, newScope);
+        }
+
+        public override Scope VisitTuple(ITupleOperation operation, Scope currentScope) =>
+            operation.Elements.Aggregate(currentScope, (scope, element) => element.Accept(this, scope));
 
         public override Scope VisitExpressionStatement(IExpressionStatementOperation operation, Scope currentScope) =>
             operation.Operation.Accept(this, currentScope);
@@ -37,6 +45,29 @@ namespace Suspension.SourceGenerator.Generator
             return scope;
         }
 
+        public override Scope VisitInterpolatedString(IInterpolatedStringOperation operation, Scope currentScope)
+        {
+            return operation.Parts.Aggregate(currentScope, (scope, part) => part.Accept(this, scope));
+        }
+
+        public override Scope VisitInterpolatedStringText(
+            IInterpolatedStringTextOperation operation,
+            Scope currentScope)
+            => currentScope;
+
+        public override Scope VisitInterpolation(IInterpolationOperation operation, Scope currentScope)
+        {
+            var operations = new[]
+            {
+                operation.Expression,
+                operation.Alignment,
+                operation.FormatString
+            };
+            return operations
+                .Where(item => item != null)
+                .Aggregate(currentScope, (scope, item) => item.Accept(this, scope));
+        }
+
         public override Scope VisitArgument(IArgumentOperation operation, Scope currentScope) =>
             operation.Value.Accept(this, currentScope);
 
@@ -49,9 +80,23 @@ namespace Suspension.SourceGenerator.Generator
         }
 
         public override Scope VisitParameterReference(IParameterReferenceOperation operation, Scope currentScope) =>
-            currentScope.Add(
+            currentScope.Union(
                 new ParameterValue(operation.Parameter)
             );
+
+        public override Scope VisitLocalReference(ILocalReferenceOperation operation, Scope currentScope)
+            => currentScope.Union(
+                new LocalValue(operation.Local)
+            );
+
+        public override Scope VisitArrayElementReference(IArrayElementReferenceOperation operation, Scope currentScope)
+        {
+            var newScope = operation.ArrayReference.Accept(this, currentScope);
+            return operation.Indices.Aggregate(newScope, (scope, index) => index.Accept(this, scope));
+        }
+
+        public override Scope VisitUnaryOperator(IUnaryOperation operation, Scope currentScope) =>
+            operation.Operand.Accept(this, currentScope);
 
         public override Scope VisitBinaryOperator(IBinaryOperation operation, Scope currentScope)
         {
@@ -72,6 +117,25 @@ namespace Suspension.SourceGenerator.Generator
 
             return scope;
         }
+
+        public override Scope VisitArrayCreation(IArrayCreationOperation operation, Scope currentScope)
+        {
+            var newScope = operation.DimensionSizes.Aggregate(
+                currentScope,
+                (scope, size) => size.Accept(this, scope)
+            );
+            return operation.Initializer switch
+            {
+                { } initializer => initializer.Accept(this, newScope),
+                null => newScope
+            };
+        }
+
+        public override Scope VisitArrayInitializer(IArrayInitializerOperation operation, Scope currentScope) =>
+            operation.ElementValues.Aggregate(
+                currentScope,
+                (scope, element) => element.Accept(this, scope)
+            );
 
         public override Scope VisitConversion(IConversionOperation operation, Scope currentScope) =>
             operation.Operand.Accept(this, currentScope);

@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Globalization;
-using NSubstitute;
-using NUnit.Framework;
 
-namespace Suspension.Tests.Samples
+namespace Suspension.Samples
 {
     public sealed partial class Parameters
     {
         [Suspendable]
-        public static void Regular(string value)
+        public static void Regular(string value, Action<bool> equals)
         {
             var a = Equals(value, "str");
+            equals(a);
         }
 
         [Suspendable]
@@ -32,19 +31,10 @@ namespace Suspension.Tests.Samples
         public static void OutDeclaration(Action<int> action)
         {
             int.TryParse("19", NumberStyles.Integer, CultureInfo.InvariantCulture, out var d);
-            Flow.Suspend("Middle");
             action(d);
-        }
-
-        [Test]
-        public void Test()
-        {
-            var spy = Substitute.For<Action<int>>();
-            var entry = new Coroutines.Out.Entry(spy);
-            var middle = entry.Run();
-            middle.Run();
-
-            spy.Received(1).Invoke(123);
+            Flow.Suspend("Parsed");
+            d += 7;
+            action(d);
         }
     }
 }

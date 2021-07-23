@@ -10,13 +10,5 @@ namespace Suspension.SourceGenerator.Domain
         public override StatementSyntax DefaultVisit(IOperation operation, Scope scope) => ExpressionStatement(
             operation.Accept(new OperationToExpression(), scope)
         );
-
-        public override StatementSyntax VisitLocalReference(ILocalReferenceOperation operation, Scope scope) =>
-            ExpressionStatement(
-                new OperationToExpression().VisitLocalReference(operation, scope)
-            );
-
-        public override StatementSyntax VisitExpressionStatement(IExpressionStatementOperation operation, Scope scope) =>
-            operation.Operation.Accept(this, scope);
     }
 }

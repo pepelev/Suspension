@@ -55,7 +55,7 @@ namespace Suspension.Tests
                 new[]
                 {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                    MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.11\\System.Runtime.dll"),
+                    MetadataReference.CreateFromFile("C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\3.1.13\\System.Runtime.dll"),
                     MetadataReference.CreateFromFile(typeof(Coroutine).Assembly.Location)
                 },
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
