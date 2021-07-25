@@ -1,6 +1,8 @@
-# What is Suspension
+# Suspension
 
 __Suspension__ is a tool for generating suspendable functions for C# - coroutines. If you familiar with `yield return` or coroutine concept you will quick understand what it is.
+
+![Suspension](logo.svg)
 
 Coroutine is pull based piece of code. So you may ask it to run until next suspension point.
 
