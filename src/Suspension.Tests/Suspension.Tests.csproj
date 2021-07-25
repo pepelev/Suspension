@@ -22,6 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      This is needed because Suspension.SourceGenerator references Suspension.
+      At build Suspension.SourceGenerator assembly is copied into temp build folder
+      and so referenced Suspension assembly is searched in that folder.
+      OutputItemType="Analyzer" attribute tells MSBuild to copy Suspension to temp
+      folder too.
+    -->
+    <ProjectReference Include="..\Suspension\Suspension.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Suspension.SourceGenerator\Suspension.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     <ProjectReference Include="..\Suspension\Suspension.csproj" />
   </ItemGroup>
